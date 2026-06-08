@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resilience Test Series Preview</title>
+    <style>
+      :root {
+        --bg: #f6f2ea;
+        --panel: rgba(255, 255, 255, 0.82);
+        --ink: #11182a;
+        --muted: #5f6b85;
+        --accent: #c88b2f;
+        --accent-soft: #fff1d9;
+        --border: rgba(17, 24, 42, 0.08);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(200, 139, 47, 0.15), transparent 26%),
+          radial-gradient(circle at top right, rgba(17, 24, 42, 0.06), transparent 28%),
+          linear-gradient(180deg, #fcfaf7, #f4ede3);
+        min-height: 100vh;
+      }
+      .wrap {
+        width: min(1180px, calc(100% - 32px));
+        margin: 24px auto 40px;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: #11182a;
+        color: white;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .brand p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .shell {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 18px;
+      }
+      .nav, .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(18px);
+        border-radius: 28px;
+        box-shadow: 0 24px 80px rgba(17, 24, 42, 0.12);
+      }
+      .nav {
+        padding: 18px;
+        position: sticky;
+        top: 18px;
+        align-self: start;
+      }
+      .nav h2, .section h2 {
+        margin: 0;
+        font-size: 14px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #9a6511;
+      }
+      .nav button, .btn {
+        appearance: none;
+        border: 0;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: white;
+        color: var(--ink);
+        font-weight: 700;
+        margin-top: 10px;
+        box-shadow: 0 0 0 1px var(--border) inset;
+      }
+      .nav button.active {
+        background: #11182a;
+        color: white;
+      }
+      .panel {
+        padding: 28px;
+        min-height: 760px;
+      }
+      .hero {
+        padding: 26px;
+        background: linear-gradient(135deg, #fff, #fffaf1);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+      }
+      .pill {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: #9a6511;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h3 {
+        margin: 18px 0 12px;
+        font-size: clamp(2.4rem, 5vw, 4.6rem);
+        line-height: 1;
+      }
+      .sub {
+        color: var(--muted);
+        line-height: 1.8;
+        font-size: 1.02rem;
+        max-width: 900px;
+      }
+      .cards {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        margin: 22px 0;
+      }
+      .card {
+        background: rgba(255,255,255,0.88);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 18px;
+      }
+      .card b {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 1.18rem;
+      }
+      .btn {
+        display: inline-flex;
+        width: auto;
+        align-items: center;
+        justify-content: center;
+        background: #11182a;
+        color: white;
+        text-decoration: none;
+        padding: 14px 22px;
+        border-radius: 999px;
+        margin-top: 8px;
+      }
+      .btn.secondary {
+        background: white;
+        color: var(--ink);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .section {
+        margin-top: 22px;
+        padding: 20px;
+        border-radius: 24px;
+        background: white;
+        border: 1px solid var(--border);
+      }
+      .section p, li {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+      .progress {
+        height: 14px;
+        border-radius: 999px;
+        background: #f1ede4;
+        overflow: hidden;
+      }
+      .bar {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #d6a34c, #11182a);
+      }
+      .hidden { display: none; }
+      .mini {
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid var(--border);
+      }
+      input, textarea, select {
+        width: 100%;
+        border: 1px solid rgba(17,24,42,0.12);
+        border-radius: 16px;
+        padding: 12px 14px;
+        font: inherit;
+        outline: none;
+        background: white;
+      }
+      textarea { min-height: 120px; resize: vertical; }
+      .stack { display: grid; gap: 12px; }
+      .small { font-size: 13px; color: var(--muted); }
+      @media (max-width: 980px) {
+        .shell { grid-template-columns: 1fr; }
+        .nav { position: static; }
+        .grid2 { justify-items: center; }
+        .section {
+          width: min(440px, 100%);
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+      @media (max-width: 640px) {
+        .wrap { width: min(100% - 18px, 1180px); margin: 10px auto 22px; }
+        .panel, .nav { border-radius: 22px; }
+        .panel { padding: 18px; }
+        .grid2 { grid-template-columns: 1fr; }
+        h3 { font-size: clamp(2rem, 12vw, 3.2rem); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="mark">R</div>
+          <div>
+            <h1>Resilience Test Series</h1>
+            <p>Local preview navigation hub</p>
+          </div>
+        </div>
+        <div class="small">This is a fallback demo. The real app is built in the Next.js project.</div>
+      </div>
+
+      <div class="shell">
+        <aside class="nav">
+          <h2>Navigate</h2>
+          <button class="active" data-view="home">Homepage</button>
+          <button data-view="register">Register</button>
+          <button data-view="student">Student Dashboard</button>
+        </aside>
+
+        <main class="panel">
+          <section id="home" class="view">
+            <div class="hero">
+              <span class="pill">Public landing page</span>
+              <h3>Discipline-first CA Final test series.</h3>
+              <p class="sub">
+                Students choose subjects, commit to 10-30 day timelines, submit answer sheets, get evaluated by Chartered Accountants, and unlock refund eligibility when they stay sincere and on schedule.
+              </p>
+              <div class="cards">
+                <div class="card"><b>6 Subjects</b> FR, FM, Audit, DT, IDT, IBS</div>
+                <div class="card"><b>Refundable Deposit</b> Incentive for sincerity</div>
+                <div class="card"><b>2 CA Evaluation</b> Expert review and remarks</div>
+                <div class="card"><b>Mobile Friendly</b> Built for phones first</div>
+              </div>
+              <a class="btn" href="#" onclick="show('register')">Start Now</a>
+            </div>
+
+            <div class="grid2">
+              <div class="section">
+                <h2>Pricing</h2>
+                <p>Full package: ₹1199 course fee + ₹1000 refundable deposit.</p>
+                <p>Example: 3 subjects = ₹599 + ₹500 refundable deposit.</p>
+              </div>
+              <div class="section">
+                <h2>Benefits</h2>
+                <ul>
+                  <li>Personal evaluation by 2 Chartered Accountants</li>
+                  <li>Doubt solving and personalized guidance</li>
+                  <li>Accountability system with deadlines</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section id="register" class="view hidden">
+            <div class="hero">
+              <span class="pill">Student registration</span>
+              <h3>Signup, tick papers, set dates, submit.</h3>
+              <p class="sub">This is the first user journey after clicking Start Now.</p>
+            </div>
+            <div class="grid2">
+              <div class="section stack" style="padding:18px; max-width:440px;">
+                <h2>Collect details</h2>
+                <input placeholder="First Name" required style="padding:10px 12px; border-radius:12px; height:42px;" />
+                <input placeholder="Last Name" required style="padding:10px 12px; border-radius:12px; height:42px;" />
+                <input placeholder="Mobile Number" required style="padding:10px 12px; border-radius:12px; height:42px;" />
+                <input placeholder="Email ID" required style="padding:10px 12px; border-radius:12px; height:42px;" />
+              </div>
+              <div class="section stack" style="padding:18px; max-width:440px;">
+                <h2>Selection and UPI confirmation</h2>
+                <div class="mini">Tick a paper and enter the exact date you plan to give it.</div>
+                <div class="stack">
+                  <label class="mini">
+                    <div class="row">
+                      <span><input type="checkbox" /> Financial Reporting</span>
+                      <span class="small">Paper date</span>
+                    </div>
+                    <input type="date" required style="padding:10px 12px; border-radius:12px;" />
+                  </label>
+                  <label class="mini">
+                    <div class="row">
+                      <span><input type="checkbox" /> Financial Management</span>
+                      <span class="small">Paper date</span>
+                    </div>
+                    <input type="date" required style="padding:10px 12px; border-radius:12px;" />
+                  </label>
+                  <label class="mini">
+                    <div class="row">
+                      <span><input type="checkbox" /> Audit</span>
+                      <span class="small">Paper date</span>
+                    </div>
+                    <input type="date" required style="padding:10px 12px; border-radius:12px;" />
+                  </label>
+                  <label class="mini">
+                    <div class="row">
+                      <span><input type="checkbox" /> Direct Tax</span>
+                      <span class="small">Paper date</span>
+                    </div>
+                    <input type="date" required style="padding:10px 12px; border-radius:12px;" />
+                  </label>
+                  <label class="mini">
+                    <div class="row">
+                      <span><input type="checkbox" /> Indirect Tax</span>
+                      <span class="small">Paper date</span>
+                    </div>
+                    <input type="date" required style="padding:10px 12px; border-radius:12px;" />
+                  </label>
+                  <label class="mini">
+                    <div class="row">
+                      <span><input type="checkbox" /> IBS</span>
+                      <span class="small">Paper date</span>
+                    </div>
+                    <input type="date" required style="padding:10px 12px; border-radius:12px;" />
+                  </label>
+                </div>
+                <div class="mini">
+                  <b>UPI payment</b>
+                  <p class="small">Scan the QR code below with any UPI app and then submit for admin confirmation.</p>
+                  <div style="margin-top:12px; border-radius:18px; overflow:hidden; background:#fff; border:1px solid rgba(15,23,42,.08); padding:12px;">
+                    <img src="/upi-qr.png" alt="UPI QR code" style="width:100%; max-width:420px; display:block; margin:0 auto; border-radius:16px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <div style="display:none; border-radius:16px; border:1px dashed rgba(180,120,20,.35); background:#fff7e6; padding:18px; text-align:center; color:#8b5e18;">
+                      Add your QR image at <code>/public/upi-qr.png</code>.
+                    </div>
+                  </div>
+                </div>
+                <div class="mini">Once admin approves the UPI confirmation, the schedule appears in the student dashboard.</div>
+                <a class="btn" href="#" onclick="show('student')">Submit for confirmation</a>
+                <a class="btn" href="#" onclick="show('student')">Demo: waiting for confirmation</a>
+              </div>
+            </div>
+          </section>
+
+          <section id="student" class="view hidden">
+            <div class="hero">
+              <span class="pill">Student dashboard</span>
+              <h3>Waiting for payment confirmation.</h3>
+              <p class="sub">The schedule unlocks after an admin confirms the payment.</p>
+            </div>
+            <div class="grid2">
+              <div class="section">
+                <h2>Current status</h2>
+                <div class="mini">
+                  <b>Waiting for payment confirmation</b>
+                  <p class="small">Your papers and dates are saved. The dashboard schedule will appear after admin confirmation.</p>
+                </div>
+              </div>
+              <div class="section">
+                <h2>Summary</h2>
+                <div class="mini">
+                  <b>Subjects saved</b>
+                  <p class="small">FR, Audit, Direct Tax</p>
+                </div>
+                <div class="mini" style="margin-top:12px">
+                  <b>Amount</b>
+                  <p class="small">Course fee + refundable deposit recorded for admin review.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="guide" class="view hidden">
+            <div class="hero">
+              <span class="pill">User flow</span>
+              <h3>What the user sees, step by step.</h3>
+              <p class="sub">
+                1. Homepage explains the concept and pricing.
+                2. Start Now opens registration.
+                3. UPI confirmation sends the enrollment to admin review.
+                4. Student dashboard waits until admin approval unlocks the schedule.
+                5. Admin console is opened separately with its own launcher button.
+              </p>
+            </div>
+            <div class="section">
+              <h2>Real app note</h2>
+              <p>
+                The full website already exists inside the project files. This page is only a local navigation demo because the machine cannot start the Next.js server here.
+              </p>
+              <a class="btn secondary" href="README.md">Open setup instructions</a>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const views = document.querySelectorAll(".view");
+      const buttons = document.querySelectorAll(".nav button");
+
+      function show(id) {
+        views.forEach((view) => view.classList.toggle("hidden", view.id !== id));
+        buttons.forEach((button) => button.classList.toggle("active", button.dataset.view === id));
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => show(button.dataset.view));
+      });
+
+      window.show = show;
+    </script>
+  </body>
+</html>

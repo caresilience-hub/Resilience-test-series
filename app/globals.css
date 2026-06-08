@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f6f2ea;
+  --surface: rgba(255, 255, 255, 0.8);
+  --surface-strong: rgba(255, 255, 255, 0.94);
+  --text: #11182a;
+  --muted: #5f6b85;
+  --border: rgba(17, 24, 42, 0.08);
+  --accent: #c88b2f;
+  --accent-deep: #7b4c0f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-manrope), sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(200, 139, 47, 0.13), transparent 30%),
+    radial-gradient(circle at top right, rgba(17, 24, 42, 0.07), transparent 26%),
+    linear-gradient(180deg, #fcfaf7 0%, #f5efe6 100%);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.grid-noise {
+  background-image: linear-gradient(rgba(17, 24, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 42, 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border);
+}
+
+.glass-strong {
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+}
+
+.hero-glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 24px 90px rgba(30, 22, 12, 0.18);
+}

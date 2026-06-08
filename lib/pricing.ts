@@ -1,0 +1,115 @@
+export const subjects = [
+  "Financial Reporting",
+  "Financial Management",
+  "Audit",
+  "Direct Tax",
+  "Indirect Tax",
+  "IBS"
+] as const;
+
+export type SubjectName = (typeof subjects)[number];
+
+export type PricingPlan = {
+  subjects: number;
+  courseFee: number;
+  refundableDeposit: number;
+};
+
+export const pricingTable: PricingPlan[] = [
+  { subjects: 1, courseFee: 199, refundableDeposit: 500 },
+  { subjects: 2, courseFee: 399, refundableDeposit: 500 },
+  { subjects: 3, courseFee: 599, refundableDeposit: 500 },
+  { subjects: 4, courseFee: 799, refundableDeposit: 1000 },
+  { subjects: 5, courseFee: 999, refundableDeposit: 1000 },
+  { subjects: 6, courseFee: 1199, refundableDeposit: 1000 }
+];
+
+export function calculatePlan(selectedCount: number) {
+  const count = Math.min(Math.max(selectedCount, 1), 6);
+  return pricingTable.find((plan) => plan.subjects === count) ?? pricingTable[2];
+}
+
+export function calculateRegistrationPricing(selectedCount: number) {
+  const count = Math.min(Math.max(selectedCount, 0), 6);
+
+  if (count === 0) {
+    return {
+      count,
+      courseFee: 0,
+      refundableDeposit: 0,
+      totalPayable: 0
+    };
+  }
+
+  const courseFee = count * 200 - 1;
+  const refundableDeposit = count <= 3 ? 500 : 1000;
+
+  return {
+    count,
+    courseFee,
+    refundableDeposit,
+    totalPayable: courseFee + refundableDeposit
+  };
+}
+
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+export function formatDate(date: Date | string) {
+  const value = new Date(date);
+  const day = String(value.getDate()).padStart(2, "0");
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const year = String(value.getFullYear());
+
+  return `${day}/${month}/${year}`;
+}
+
+export function parseDisplayDate(value: string) {
+  const trimmed = String(value ?? "").trim();
+  if (!trimmed) return null;
+
+  const ddmmyyyy = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (ddmmyyyy) {
+    const day = Number(ddmmyyyy[1]);
+    const month = Number(ddmmyyyy[2]);
+    const year = Number(ddmmyyyy[3]);
+    const parsed = new Date(year, month - 1, day);
+
+    if (
+      parsed.getFullYear() === year &&
+      parsed.getMonth() === month - 1 &&
+      parsed.getDate() === day
+    ) {
+      return parsed;
+    }
+  }
+
+  const iso = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) {
+    const year = Number(iso[1]);
+    const month = Number(iso[2]);
+    const day = Number(iso[3]);
+    const parsed = new Date(year, month - 1, day);
+
+    if (
+      parsed.getFullYear() === year &&
+      parsed.getMonth() === month - 1 &&
+      parsed.getDate() === day
+    ) {
+      return parsed;
+    }
+  }
+
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function formatDateInput(value: string) {
+  const parsed = parseDisplayDate(value);
+  return parsed ? formatDate(parsed) : value;
+}

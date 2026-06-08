@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum SubmissionStatus {
+  PENDING
+  SUBMITTED
+  EVALUATED
+  NEEDS_REVISION
+}
+
+enum RefundStatus {
+  NOT_ELIGIBLE
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  WAITING_CONFIRMATION
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id          String     @id @default(cuid())
+  firstName   String?
+  surname     String?
+  mobile      String?    @unique
+  email       String     @unique
+  role        UserRole   @default(STUDENT)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  student     Student?
+  otpCodes    OtpCode[]
+  sessions    Session[]
+}
+
+model Student {
+  id                 String       @id @default(cuid())
+  userId             String       @unique
+  selectedSubjects   String
+  subjectTimelines   String
+  courseFee          Int
+  refundableDeposit  Int
+  totalPaid          Int
+  paymentStatus      PaymentStatus @default(WAITING_CONFIRMATION)
+  refundStatus       RefundStatus @default(NOT_ELIGIBLE)
+  sincerityScore     Int          @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollments        Enrollment[]
+  submissions        Submission[]
+  doubtRequests      DoubtRequest[]
+  paperAccesses      PaperAccess[]
+}
+
+model Enrollment {
+  id             String   @id @default(cuid())
+  studentId      String
+  subject        String
+  timelineDays   Int
+  startDate      DateTime
+  dueDate        DateTime
+  isLocked       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model SubjectPaper {
+  id              String   @id @default(cuid())
+  subject         String
+  title           String
+  kind            String
+  fileUrl         String
+  sampleAnswerUrl  String?
+  marks           Int      @default(100)
+  publishedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  paperAccesses   PaperAccess[]
+}
+
+model Submission {
+  id              String           @id @default(cuid())
+  studentId       String
+  subject         String
+  paperTitle      String
+  fileUrl         String
+  checkedAnswerUrl String?
+  status          SubmissionStatus @default(SUBMITTED)
+  marksAwarded    Int?
+  sincereAttempt  Boolean          @default(false)
+  evaluatorNote   String?
+  checkedAt       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  student         Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model PaperAccess {
+  id                  String   @id @default(cuid())
+  studentId           String
+  subjectPaperId      String
+  canDownloadPaper    Boolean  @default(false)
+  canDownloadAnswer   Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  student             Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectPaper        SubjectPaper @relation(fields: [subjectPaperId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, subjectPaperId])
+}
+
+model DoubtRequest {
+  id          String   @id @default(cuid())
+  studentId   String
+  message     String
+  channel     String   @default("in-app")
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model OtpCode {
+  id         String   @id @default(cuid())
+  userId     String
+  codeHash   String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
