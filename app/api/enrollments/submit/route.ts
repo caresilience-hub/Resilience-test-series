@@ -18,6 +18,14 @@ export async function POST(request: NextRequest) {
   const paperDates = body.paperDates && typeof body.paperDates === "object" ? body.paperDates : {};
   const pricing = body.pricing ?? {};
 
+  if (!/^\d{10}$/.test(mobile)) {
+    return NextResponse.json({ message: "Please enter a 10-digit contact number." }, { status: 400 });
+  }
+
+  if (!email.includes("@")) {
+    return NextResponse.json({ message: "Please enter a valid email address." }, { status: 400 });
+  }
+
   if (!firstName || !surname || !mobile || !email) {
     return NextResponse.json({ message: "Please complete student details before submitting." }, { status: 400 });
   }

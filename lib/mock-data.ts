@@ -1,7 +1,10 @@
 export const landingStats = [
-  { label: 'Structured test cycles', value: '10-30 days' },
-  { label: 'Evaluators', value: '2 CAs' },
-  { label: 'Refund deposit', value: '₹1000' }
+  { label: 'Structured test cycles', value: 'Give papers as per your timeline' },
+  {
+    label: 'Evaluators',
+    value: '1. CA Rishabh Daga - AIR 50 in CA Inter.\n2. CA Swarali Chandorkar.'
+  },
+  { label: 'Refund deposit', value: 'Deposit to keep you motivated to follow your plan' }
 ];
 
 export const testimonials = [

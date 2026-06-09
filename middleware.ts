@@ -8,25 +8,42 @@ function readRole(session: string | undefined) {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublicAuthRoute =
-    pathname === "/login" || pathname.startsWith("/api/auth");
+    pathname === "/login" || pathname === "/admin/login" || pathname.startsWith("/api/auth");
 
   if (isPublicAuthRoute) {
-    return NextResponse.next();
-  }
-
-  if (!pathname.startsWith("/student")) {
     return NextResponse.next();
   }
 
   const session = request.cookies.get("resillience_session")?.value;
   const role = readRole(session);
 
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
+  const isStudentRoute = pathname.startsWith("/student") || pathname.startsWith("/api/students");
+
+  if (!isAdminRoute && !isStudentRoute) {
+    return NextResponse.next();
+  }
+
   if (!role) {
-    const loginUrl = new URL(pathname.startsWith("/admin") ? "/admin/login" : "/login", request.url);
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const loginUrl = new URL(isAdminRoute ? "/admin/login" : "/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname.startsWith("/student") && role !== "STUDENT") {
+  if (isAdminRoute && role !== "ADMIN") {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
+  if (isStudentRoute && role !== "STUDENT") {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -34,5 +51,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/student", "/student/:path*"]
+  matcher: ["/admin", "/admin/:path*", "/student", "/student/:path*", "/api/admin/:path*", "/api/students/:path*"]
 };

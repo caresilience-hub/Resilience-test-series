@@ -1,6 +1,6 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
-import { del, put } from "@vercel/blob";
+import { deleteBlob, uploadBlob } from "@/lib/vercel-blob";
 
 function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -12,7 +12,7 @@ export async function savePublicUpload(file: File, segments: string[]) {
   const relativePath = posix.join(...segments, fileName);
 
   if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const blob = await put(relativePath, file, {
+    const blob = await uploadBlob(relativePath, file, {
       access: "public",
       token: process.env.BLOB_READ_WRITE_TOKEN
     });
@@ -30,7 +30,7 @@ export async function deletePublicUpload(fileUrl: string) {
   if (!fileUrl) return;
 
   if (fileUrl.startsWith("http")) {
-    await del(fileUrl, {
+    await deleteBlob(fileUrl, {
       token: process.env.BLOB_READ_WRITE_TOKEN
     });
     return;

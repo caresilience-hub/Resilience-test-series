@@ -5,7 +5,6 @@ import { pricingTable, subjects } from "@/lib/pricing";
 
 const benefits = [
   "Personal evaluation by 2 Chartered Accountants",
-  "Doubt solving and timely clarifications",
   "Personalized guidance with performance tracking",
   "Accountability system with timeline discipline",
   "Refundable deposit incentive for sincere attempts"
@@ -40,7 +39,7 @@ export default function HomePage() {
                 {landingStats.map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/50 bg-white/80 p-4">
                     <p className="text-xs uppercase tracking-[0.26em] text-ink-500">{item.label}</p>
-                    <p className="mt-2 text-lg font-semibold text-ink-900">{item.value}</p>
+                    <p className="mt-2 whitespace-pre-line text-lg font-semibold text-ink-900">{item.value}</p>
                   </div>
                 ))}
               </div>

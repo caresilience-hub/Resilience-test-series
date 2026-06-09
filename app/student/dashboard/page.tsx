@@ -364,16 +364,6 @@ export default function StudentDashboardPage() {
           </div>
 
           <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-            <SectionHeading eyebrow="Doubt solving" title="Raise a query for CA review." />
-            <textarea
-              rows={6}
-              placeholder="Describe the concept or paper section you need help with..."
-              className="mt-4 w-full rounded-2xl border border-black/10 p-4 text-sm outline-none focus:border-amber-300"
-            />
-            <button className="mt-4 w-full rounded-full bg-ink-900 px-4 py-3 text-sm font-semibold text-white">Send request</button>
-          </div>
-
-          <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
             <SectionHeading eyebrow="Notes" title="Communication and notifications" />
             <p className="mt-4 text-sm leading-7 text-ink-600">
               Email reminders and WhatsApp notifications can be hooked into the backend notification service. This dashboard is ready for those integrations.

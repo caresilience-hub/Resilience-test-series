@@ -33,7 +33,14 @@ export default function RegisterPage() {
   });
 
   const pricing = calculateRegistrationPricing(form.selectedSubjects.length);
-  const detailsComplete = Boolean(form.firstName.trim() && form.surname.trim() && form.mobile.trim() && form.email.trim());
+  const mobileDigits = form.mobile.replace(/\D/g, "");
+  const emailHasAt = form.email.includes("@");
+  const detailsComplete = Boolean(
+    form.firstName.trim() &&
+      form.surname.trim() &&
+      mobileDigits.length === 10 &&
+      emailHasAt
+  );
   const canProceed = form.selectedSubjects.length > 0 && form.selectedSubjects.every((subject) => Boolean(form.paperDates[subject]));
 
   function toggleSubject(subject: string) {
@@ -62,7 +69,7 @@ export default function RegisterPage() {
     }
 
     if (!detailsComplete) {
-      setStatus("Please complete the student details before submitting.");
+      setStatus("Please enter a 10-digit contact number and a valid email address before submitting.");
       setStep("details");
       return;
     }
@@ -151,11 +158,18 @@ export default function RegisterPage() {
                   <label key={field.key} className="space-y-1.5">
                     <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600">{field.label}</span>
                     <input
+                      type={field.key === "email" ? "email" : "text"}
+                      inputMode={field.key === "mobile" ? "numeric" : undefined}
+                      pattern={field.key === "mobile" ? "\\d{10}" : undefined}
+                      maxLength={field.key === "mobile" ? 10 : undefined}
                       value={form[field.key as keyof FormState] as string}
                       onChange={(event) =>
                         setForm((current) => ({
                           ...current,
-                          [field.key]: event.target.value
+                          [field.key]:
+                            field.key === "mobile"
+                              ? event.target.value.replace(/\D/g, "").slice(0, 10)
+                              : event.target.value
                       }))
                       }
                       placeholder={field.placeholder}
@@ -193,7 +207,7 @@ export default function RegisterPage() {
                       <input
                         type="text"
                         inputMode="numeric"
-                        pattern="\d{2}/\d{2}/\d{4}"
+                        pattern="[0-3][0-9]/[0-1][0-9]/[0-9]{4}"
                         placeholder="dd/mm/yyyy"
                         maxLength={10}
                         value={form.paperDates[subject] ?? ""}
