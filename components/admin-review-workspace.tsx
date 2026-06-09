@@ -188,6 +188,7 @@ export function AdminReviewWorkspace() {
     event.currentTarget.querySelectorAll('input[type="file"]').forEach((input) => {
       (input as HTMLInputElement).value = "";
     });
+    await refresh();
   }
 
   async function uploadCheckedAnswer(submissionId: string, formData: FormData) {
