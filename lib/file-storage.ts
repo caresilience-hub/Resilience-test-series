@@ -1,9 +1,16 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
-import { deleteBlob, uploadBlob } from "@/lib/vercel-blob";
 
 function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+async function loadBlobSdk() {
+  try {
+    return await import("@vercel/blob");
+  } catch {
+    return null;
+  }
 }
 
 export async function savePublicUpload(file: File, segments: string[]) {
@@ -12,11 +19,15 @@ export async function savePublicUpload(file: File, segments: string[]) {
   const relativePath = posix.join(...segments, fileName);
 
   if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const blob = await uploadBlob(relativePath, file, {
-      access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN
-    });
-    return blob.url;
+    const blobSdk = await loadBlobSdk();
+    if (blobSdk?.put) {
+      const blob = await blobSdk.put(relativePath, file, {
+        access: "public",
+        addRandomSuffix: false,
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+      return blob.url;
+    }
   }
 
   const absolutePath = join(process.cwd(), "public", "storage", ...segments, fileName);
@@ -30,9 +41,13 @@ export async function deletePublicUpload(fileUrl: string) {
   if (!fileUrl) return;
 
   if (fileUrl.startsWith("http")) {
-    await deleteBlob(fileUrl, {
-      token: process.env.BLOB_READ_WRITE_TOKEN
-    });
+    const blobSdk = await loadBlobSdk();
+    if (blobSdk?.del) {
+      await blobSdk.del(fileUrl, {
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+      return;
+    }
     return;
   }
 
