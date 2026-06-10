@@ -32,6 +32,14 @@ type GrantItem = {
   subjectPaperId: string;
   canDownloadPaper: boolean;
   canDownloadAnswer: boolean;
+  student: {
+    user: {
+      firstName: string | null;
+      surname: string | null;
+      email: string;
+      mobile: string | null;
+    };
+  };
   subjectPaper: {
     title: string;
     subject: string;
@@ -616,7 +624,12 @@ export function AdminReviewWorkspace() {
                     <p className="font-semibold text-ink-900">
                       {grant.subjectPaper.subject} - {grant.subjectPaper.title}
                     </p>
-                    <p className="mt-1 text-sm text-ink-600">Student ID: {grant.studentId}</p>
+                    <p className="mt-1 text-sm text-ink-600">
+                      Student: {[grant.student.user.firstName, grant.student.user.surname].filter(Boolean).join(" ") || "Student"}
+                    </p>
+                    <p className="mt-1 text-sm text-ink-600">Email: {grant.student.user.email}</p>
+                    <p className="mt-1 text-sm text-ink-600">Mobile: {grant.student.user.mobile ?? "Not saved"}</p>
+                    <p className="mt-1 text-xs text-ink-500">Student ID: {grant.studentId}</p>
                     <p className="mt-1 text-sm text-ink-600">
                       Question paper: {grant.canDownloadPaper ? "Granted" : "Locked"} | Answer sheet: {grant.canDownloadAnswer ? "Granted" : "Locked"}
                     </p>

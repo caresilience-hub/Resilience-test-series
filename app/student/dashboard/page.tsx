@@ -171,7 +171,7 @@ export default function StudentDashboardPage() {
     >
       {message ? <p className="mb-6 rounded-2xl border border-black/5 bg-white px-4 py-3 text-sm text-ink-700 shadow-soft">{message}</p> : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] xl:gap-8">
         <section className="space-y-6">
           <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
             <SectionHeading eyebrow="Plan overview" title="Your enrolled subjects and commitment window." />
@@ -202,115 +202,119 @@ export default function StudentDashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-            <SectionHeading eyebrow="Granted papers" title="Question papers and sample answers unlocked by admin." />
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              {grantedPapers.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-black/10 bg-ink-50 p-4 text-sm text-ink-600">
-                  No papers have been granted to you yet.
-                </div>
-              ) : (
-                grantedPapers.map((paper) => (
-                  <article key={paper.id} className="rounded-2xl border border-black/5 bg-ink-50 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-semibold text-ink-900">{paper.title}</p>
-                      {paper.kind ? (
-                        <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-600">
-                          {paper.kind === "answer-sheet" ? "Answer sheet" : "Question paper"}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="text-sm text-ink-600">{paper.subject}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <a
-                        href={paper.canDownloadPaper ? paper.fileUrl ?? "#" : "#"}
-                        target={paper.canDownloadPaper ? "_blank" : undefined}
-                        rel={paper.canDownloadPaper ? "noopener noreferrer" : undefined}
-                        className={`rounded-full px-4 py-2 text-xs font-semibold ${
-                          paper.canDownloadPaper ? "bg-ink-900 text-white" : "cursor-not-allowed bg-white text-ink-400"
-                        }`}
-                        onClick={(event) => {
-                          if (!paper.canDownloadPaper) event.preventDefault();
-                        }}
-                      >
-                        Open question paper
-                      </a>
-                      <a
-                        href={paper.canDownloadAnswer ? paper.sampleAnswerUrl ?? "#" : "#"}
-                        target={paper.canDownloadAnswer ? "_blank" : undefined}
-                        rel={paper.canDownloadAnswer ? "noopener noreferrer" : undefined}
-                        className={`rounded-full px-4 py-2 text-xs font-semibold ${
-                          paper.canDownloadAnswer ? "border border-black/10 bg-white text-ink-900" : "cursor-not-allowed bg-white text-ink-400"
-                        }`}
-                        onClick={(event) => {
-                          if (!paper.canDownloadAnswer) event.preventDefault();
-                        }}
-                      >
-                        Open answer sheet
-                      </a>
-                    </div>
-                  </article>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-            <SectionHeading eyebrow="Upcoming papers" title="Deadlines and scheduled papers." />
-            <div className="mt-6 space-y-4">
-              {upcomingPapers.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-black/10 bg-ink-50 p-4 text-sm text-ink-600">
-                  No timeline entries yet.
-                </div>
-              ) : (
-                upcomingPapers.map((paper) => (
-                  <div key={`${paper.subject}-${paper.title}`} className="flex items-center justify-between gap-4 rounded-2xl border border-black/5 bg-ink-50 p-4">
-                    <div>
-                      <p className="font-semibold text-ink-900">{paper.title}</p>
-                      <p className="text-sm text-ink-600">{paper.subject}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-amber-700">{paper.dueIn}</p>
-                      <p className="text-xs text-ink-500">until deadline</p>
-                    </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+              <SectionHeading eyebrow="Granted papers" title="Question papers and sample answers unlocked by admin." />
+              <div className="mt-6 grid gap-4">
+                {grantedPapers.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-black/10 bg-ink-50 p-4 text-sm text-ink-600">
+                    No papers have been granted to you yet.
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-            <SectionHeading eyebrow="Planned schedule" title="Your paper schedule and upload window." />
-            <div className="mt-6 space-y-4">
-              {schedule.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-black/10 bg-ink-50 p-4 text-sm text-ink-600">
-                  No schedule entries loaded yet.
-                </div>
-              ) : (
-                schedule.map((paper) => (
-                  <div key={paper.id} className="flex flex-col gap-3 rounded-2xl border border-black/5 bg-ink-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="font-semibold text-ink-900">{paper.title}</p>
+                ) : (
+                  grantedPapers.map((paper) => (
+                    <article key={paper.id} className="rounded-2xl border border-black/5 bg-ink-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="font-semibold text-ink-900">{paper.title}</p>
+                        {paper.kind ? (
+                          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-600">
+                            {paper.kind === "answer-sheet" ? "Answer sheet" : "Question paper"}
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="text-sm text-ink-600">{paper.subject}</p>
-                      <p className="text-xs text-ink-500">Scheduled for {paper.dueDateLabel}</p>
-                    </div>
-                    <div className="text-sm font-semibold">
-                      {paper.canUpload ? (
-                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">Upload open</span>
-                      ) : (
-                        <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">Upload opens on {paper.dueDateLabel}</span>
-                      )}
-                    </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <a
+                          href={paper.canDownloadPaper ? paper.fileUrl ?? "#" : "#"}
+                          target={paper.canDownloadPaper ? "_blank" : undefined}
+                          rel={paper.canDownloadPaper ? "noopener noreferrer" : undefined}
+                          className={`rounded-full px-4 py-2 text-xs font-semibold ${
+                            paper.canDownloadPaper ? "bg-ink-900 text-white" : "cursor-not-allowed bg-white text-ink-400"
+                          }`}
+                          onClick={(event) => {
+                            if (!paper.canDownloadPaper) event.preventDefault();
+                          }}
+                        >
+                          Open question paper
+                        </a>
+                        <a
+                          href={paper.canDownloadAnswer ? paper.sampleAnswerUrl ?? "#" : "#"}
+                          target={paper.canDownloadAnswer ? "_blank" : undefined}
+                          rel={paper.canDownloadAnswer ? "noopener noreferrer" : undefined}
+                          className={`rounded-full px-4 py-2 text-xs font-semibold ${
+                            paper.canDownloadAnswer ? "border border-black/10 bg-white text-ink-900" : "cursor-not-allowed bg-white text-ink-400"
+                          }`}
+                          onClick={(event) => {
+                            if (!paper.canDownloadAnswer) event.preventDefault();
+                          }}
+                        >
+                          Open answer sheet
+                        </a>
+                      </div>
+                    </article>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+              <SectionHeading eyebrow="Upcoming papers" title="Deadlines and scheduled papers." />
+              <div className="mt-6 space-y-4">
+                {upcomingPapers.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-black/10 bg-ink-50 p-4 text-sm text-ink-600">
+                    No timeline entries yet.
                   </div>
-                ))
-              )}
+                ) : (
+                  upcomingPapers.map((paper) => (
+                    <div key={`${paper.subject}-${paper.title}`} className="flex items-center justify-between gap-4 rounded-2xl border border-black/5 bg-ink-50 p-4">
+                      <div>
+                        <p className="font-semibold text-ink-900">{paper.title}</p>
+                        <p className="text-sm text-ink-600">{paper.subject}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-amber-700">{paper.dueIn}</p>
+                        <p className="text-xs text-ink-500">until deadline</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-            <SectionHeading eyebrow="Uploads" title="Upload answer sheets and view checked copies." />
-            <div className="mt-6">
-              <StudentAnswerWorkspace schedule={schedule} paymentStatus={paymentStatus} />
+          <div className="grid gap-6 xl:grid-cols-2">
+            <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+              <SectionHeading eyebrow="Planned schedule" title="Your paper schedule and upload window." />
+              <div className="mt-6 space-y-4">
+                {schedule.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-black/10 bg-ink-50 p-4 text-sm text-ink-600">
+                    No schedule entries loaded yet.
+                  </div>
+                ) : (
+                  schedule.map((paper) => (
+                    <div key={paper.id} className="flex flex-col gap-3 rounded-2xl border border-black/5 bg-ink-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="font-semibold text-ink-900">{paper.title}</p>
+                        <p className="text-sm text-ink-600">{paper.subject}</p>
+                        <p className="text-xs text-ink-500">Scheduled for {paper.dueDateLabel}</p>
+                      </div>
+                      <div className="text-sm font-semibold">
+                        {paper.canUpload ? (
+                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">Upload open</span>
+                        ) : (
+                          <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">Upload opens on {paper.dueDateLabel}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
+              <SectionHeading eyebrow="Uploads" title="Upload answer sheets and view checked copies." />
+              <div className="mt-6">
+                <StudentAnswerWorkspace schedule={schedule} paymentStatus={paymentStatus} />
+              </div>
             </div>
           </div>
         </section>
@@ -364,9 +368,9 @@ export default function StudentDashboardPage() {
           </div>
 
           <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
-            <SectionHeading eyebrow="Notes" title="Communication and notifications" />
+            <SectionHeading eyebrow="Last sync" title="Freshness of the dashboard data" />
             <p className="mt-4 text-sm leading-7 text-ink-600">
-              Email reminders and WhatsApp notifications can be hooked into the backend notification service. This dashboard is ready for those integrations.
+              This page refreshes automatically, so your schedule, uploads, and evaluation status stay current.
             </p>
             <p className="mt-4 text-sm text-ink-500">Last updated: {formatDate(dashboard ? new Date(dashboard.lastUpdated) : new Date())}</p>
           </div>

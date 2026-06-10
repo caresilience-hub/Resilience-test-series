@@ -24,7 +24,7 @@ export default function HomePage() {
                 Resilience Test Series builds exam discipline, not just paper attempts.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-ink-700 sm:text-lg">
-                Enroll in CA Final papers, choose a 10 to 30 day commitment window, submit sincerely, get evaluated by experts, and work toward a refundable deposit that rewards consistency.
+                Enroll in CA Final papers, choose your own timeline, submit sincerely, get evaluated by experts, and work toward a refundable deposit that rewards consistency.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <PrimaryButton href="/register">Start Now</PrimaryButton>
@@ -97,7 +97,7 @@ export default function HomePage() {
             <ol className="mt-6 space-y-4">
               {[
                 "Enter your name, mobile number, and email ID.",
-                "Choose one or more subjects and set a 10-30 day schedule for each paper.",
+                "Choose one or more subjects and set your own timeline for each paper.",
                 "Review the UPI details, submit your confirmation, and wait for admin approval.",
                 "Track timelines, uploads, evaluations, and refund eligibility from your dashboard."
               ].map((step, index) => (
