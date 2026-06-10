@@ -15,6 +15,14 @@ type SubmissionItem = {
   marksAwarded?: number | null;
   sincereAttempt?: boolean;
   evaluatorNote?: string | null;
+  student?: {
+    user?: {
+      firstName?: string | null;
+      surname?: string | null;
+      email?: string | null;
+      mobile?: string | null;
+    } | null;
+  } | null;
 };
 
 type PaperItem = {
@@ -913,16 +921,19 @@ export function AdminReviewWorkspace() {
                   Uploaded answer sheets will appear here.
                 </div>
               ) : (
-                submissions.map((submission) => (
-                  <article key={submission.id} className="rounded-2xl border border-black/5 bg-ink-50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-ink-900">{submission.paperTitle}</p>
-                        <p className="text-sm text-ink-600">{submission.subject}</p>
-                        <p className="text-xs text-ink-500">Student ID: {submission.studentId}</p>
+                  submissions.map((submission) => (
+                    <article key={submission.id} className="rounded-2xl border border-black/5 bg-ink-50 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-ink-900">{submission.paperTitle}</p>
+                          <p className="text-sm text-ink-600">{submission.subject}</p>
+                          <p className="text-sm text-ink-600">
+                            Student: {[submission.student?.user?.firstName, submission.student?.user?.surname].filter(Boolean).join(" ") || submission.student?.user?.email || "Student"}
+                          </p>
+                          <p className="text-xs text-ink-500">Student ID: {submission.studentId}</p>
+                        </div>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink-700">{submission.status}</span>
                       </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink-700">{submission.status}</span>
-                    </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <a href={submission.fileUrl} className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-ink-900">
                         Open uploaded answer
