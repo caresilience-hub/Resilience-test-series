@@ -281,7 +281,7 @@ export default function StudentDashboardPage() {
             </div>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid gap-6">
             <div className="rounded-[2rem] border border-black/5 bg-white p-6 shadow-soft">
               <SectionHeading eyebrow="Planned schedule" title="Your paper schedule and upload window." />
               <div className="mt-6 space-y-4">
