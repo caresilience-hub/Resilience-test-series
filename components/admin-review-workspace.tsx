@@ -116,6 +116,29 @@ export function AdminReviewWorkspace() {
   }, []);
 
   useEffect(() => {
+    const timer = window.setInterval(() => {
+      refresh().catch(() => undefined);
+    }, 10000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refresh().catch(() => undefined);
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+    // Intentionally run once; refresh() is stable enough for polling.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (approvedStudents.length === 0) {
       if (selectedStudentId) {
         setSelectedStudentId("");
