@@ -6,11 +6,38 @@ export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   const students = await prisma.student.findMany({
-    include: {
-      user: true,
+    select: {
+      id: true,
+      userId: true,
+      selectedSubjects: true,
+      subjectTimelines: true,
+      courseFee: true,
+      refundableDeposit: true,
+      totalPaid: true,
+      paymentStatus: true,
+      refundStatus: true,
+      sincerityScore: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          surname: true,
+          mobile: true,
+          email: true
+        }
+      },
       enrollments: true,
       submissions: {
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          subject: true,
+          paperTitle: true,
+          status: true,
+          createdAt: true
+        }
       }
     },
     orderBy: { createdAt: "desc" }

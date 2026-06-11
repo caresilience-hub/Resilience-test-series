@@ -9,11 +9,37 @@ function normalizeKind(kind?: string | null) {
 
 export async function GET(request: NextRequest) {
   const grants = await prisma.paperAccess.findMany({
-    include: {
+    select: {
+      id: true,
+      studentId: true,
+      subjectPaperId: true,
+      canDownloadPaper: true,
+      canDownloadAnswer: true,
+      createdAt: true,
+      updatedAt: true,
       student: {
-        include: { user: true }
+        select: {
+          id: true,
+          userId: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              surname: true,
+              mobile: true,
+              email: true
+            }
+          }
+        }
       },
-      subjectPaper: true
+      subjectPaper: {
+        select: {
+          id: true,
+          title: true,
+          subject: true,
+          kind: true
+        }
+      }
     },
     orderBy: { updatedAt: "desc" }
   });

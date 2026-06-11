@@ -11,6 +11,8 @@ type FormState = {
   surname: string;
   mobile: string;
   email: string;
+  password: string;
+  confirmPassword: string;
   selectedSubjects: string[];
   paperDates: Record<string, string>;
 };
@@ -28,6 +30,8 @@ export default function RegisterPage() {
     surname: "",
     mobile: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     selectedSubjects: [],
     paperDates: {}
   });
@@ -35,11 +39,15 @@ export default function RegisterPage() {
   const pricing = calculateRegistrationPricing(form.selectedSubjects.length);
   const mobileDigits = form.mobile.replace(/\D/g, "");
   const emailHasAt = form.email.includes("@");
+  const passwordReady = form.password.length >= 8;
+  const passwordsMatch = form.password === form.confirmPassword;
   const detailsComplete = Boolean(
     form.firstName.trim() &&
       form.surname.trim() &&
       mobileDigits.length === 10 &&
-      emailHasAt
+      emailHasAt &&
+      passwordReady &&
+      passwordsMatch
   );
   const canProceed = form.selectedSubjects.length > 0 && form.selectedSubjects.every((subject) => Boolean(form.paperDates[subject]));
 
@@ -69,7 +77,7 @@ export default function RegisterPage() {
     }
 
     if (!detailsComplete) {
-      setStatus("Please enter a 10-digit contact number and a valid email address before submitting.");
+      setStatus("Please complete your contact number, email address, and password before submitting.");
       setStep("details");
       return;
     }
@@ -83,6 +91,7 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          password: form.password,
           pricing
         })
       });
@@ -126,17 +135,17 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => {
-                if (detailsComplete && canProceed) {
-                  setStep("upi");
-                  setStatus("");
-                } else {
-                  setStatus(
-                    detailsComplete
-                      ? "Please select papers and set dates before opening the UPI tab."
-                      : "Please complete First Name, Last Name, Mobile Number, and Email ID before opening the UPI tab."
+                  if (detailsComplete && canProceed) {
+                    setStep("upi");
+                    setStatus("");
+                  } else {
+                    setStatus(
+                      detailsComplete
+                        ? "Please select papers and set dates before opening the UPI tab."
+                      : "Please complete First Name, Last Name, Mobile Number, Email ID, and Password before opening the UPI tab."
                   );
-                }
-              }}
+                  }
+                }}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                 step === "upi" ? "bg-ink-900 text-white" : "border border-black/10 bg-white text-ink-900"
               }`}
@@ -153,12 +162,14 @@ export default function RegisterPage() {
                   { key: "firstName", label: "First Name", placeholder: "Enter first name" },
                   { key: "surname", label: "Last Name", placeholder: "Enter last name" },
                   { key: "mobile", label: "Mobile Number", placeholder: "9876543210" },
-                  { key: "email", label: "Email ID", placeholder: "name@example.com" }
+                  { key: "email", label: "Email ID", placeholder: "name@example.com" },
+                  { key: "password", label: "Create Password", placeholder: "Minimum 8 characters", type: "password" },
+                  { key: "confirmPassword", label: "Confirm Password", placeholder: "Re-enter password", type: "password" }
                 ].map((field) => (
                   <label key={field.key} className="space-y-1.5">
                     <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600">{field.label}</span>
                     <input
-                      type={field.key === "email" ? "email" : "text"}
+                      type={field.type ?? (field.key === "email" ? "email" : "text")}
                       inputMode={field.key === "mobile" ? "numeric" : undefined}
                       pattern={field.key === "mobile" ? "\\d{10}" : undefined}
                       maxLength={field.key === "mobile" ? 10 : undefined}
@@ -170,10 +181,11 @@ export default function RegisterPage() {
                             field.key === "mobile"
                               ? event.target.value.replace(/\D/g, "").slice(0, 10)
                               : event.target.value
-                      }))
+                        }))
                       }
                       placeholder={field.placeholder}
                       required
+                      minLength={field.key === "password" || field.key === "confirmPassword" ? 8 : undefined}
                       className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-amber-300 focus:bg-white"
                     />
                   </label>

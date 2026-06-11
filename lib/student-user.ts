@@ -3,6 +3,7 @@ type StudentIdentityInput = {
   surname: string;
   mobile: string;
   email: string;
+  passwordHash?: string;
 };
 
 export async function upsertStudentIdentity(transaction: any, input: StudentIdentityInput) {
@@ -20,6 +21,10 @@ export async function upsertStudentIdentity(transaction: any, input: StudentIden
       surname,
       role: "STUDENT"
     };
+
+    if (input.passwordHash) {
+      (data as Record<string, string | undefined>).passwordHash = input.passwordHash;
+    }
 
     if (!existingByMobile || existingByMobile.id === existingByEmail.id) {
       data.mobile = mobile;
@@ -41,6 +46,10 @@ export async function upsertStudentIdentity(transaction: any, input: StudentIden
       role: "STUDENT"
     };
 
+    if (input.passwordHash) {
+      (data as Record<string, string | undefined>).passwordHash = input.passwordHash;
+    }
+
     if (!existingByEmail || existingByEmail.id === existingByMobile.id) {
       data.email = email;
     }
@@ -60,6 +69,7 @@ export async function upsertStudentIdentity(transaction: any, input: StudentIden
       surname,
       mobile,
       email,
+      ...(input.passwordHash ? { passwordHash: input.passwordHash } : {}),
       role: "STUDENT"
     }
   });

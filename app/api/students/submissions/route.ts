@@ -24,9 +24,20 @@ async function getStudentForRequest(request: NextRequest) {
 
   return prisma.student.findUnique({
     where: { userId: session.userId },
-    include: {
+    select: {
+      id: true,
+      userId: true,
+      paymentStatus: true,
       enrollments: true,
-      user: true
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          surname: true,
+          mobile: true,
+          email: true
+        }
+      }
     }
   });
 }

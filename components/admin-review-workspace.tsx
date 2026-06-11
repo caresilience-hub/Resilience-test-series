@@ -95,6 +95,12 @@ export function AdminReviewWorkspace() {
   const [grants, setGrants] = useState<GrantItem[]>([]);
   const [students, setStudents] = useState<StudentItem[]>([]);
   const [message, setMessage] = useState("");
+  const [resetPasswordNotice, setResetPasswordNotice] = useState<{
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    temporaryPassword: string;
+  } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const approvedStudents = useMemo(() => students.filter((student) => student.paymentStatus === "APPROVED"), [students]);
@@ -264,6 +270,57 @@ export function AdminReviewWorkspace() {
     setPapers((current) => current.filter((paper) => paper.id !== paperId));
   }
 
+  async function deleteStudent(studentId: string) {
+    const confirmed = window.confirm(
+      "Delete this student and all of their registrations, submissions, access grants, and uploaded files?"
+    );
+    if (!confirmed) return;
+
+    const response = await fetch(`/api/admin/students/${studentId}`, {
+      method: "DELETE"
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setMessage(data.message ?? "Unable to delete student.");
+      return;
+    }
+
+    setMessage("Student and related data deleted.");
+    await refresh();
+  }
+
+  async function resetStudentPassword(studentId: string) {
+    const response = await fetch(`/api/admin/students/${studentId}/password`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setMessage(data.message ?? "Unable to reset password.");
+      return;
+    }
+
+    setResetPasswordNotice({
+      studentId: data.studentId ?? studentId,
+      studentName: data.student?.name ?? "Student",
+      studentEmail: data.student?.email ?? "",
+      temporaryPassword: data.temporaryPassword ?? ""
+    });
+    setMessage("Temporary password generated. Copy it and share it with the student.");
+  }
+
+  async function copyTemporaryPassword(password: string) {
+    try {
+      await navigator.clipboard.writeText(password);
+      setMessage("Temporary password copied to clipboard.");
+    } catch {
+      setMessage("Could not copy automatically. Please select and copy the temporary password manually.");
+    }
+  }
+
   async function updatePaymentStatus(studentId: string, paymentStatus: "WAITING_CONFIRMATION" | "APPROVED" | "REJECTED") {
     const response = await fetch(`/api/admin/students/${studentId}/payment`, {
       method: "PATCH",
@@ -404,6 +461,41 @@ export function AdminReviewWorkspace() {
           ))}
         </div>
       </div>
+
+      {resetPasswordNotice ? (
+        <div className="rounded-[2rem] border border-amber-200 bg-amber-50 p-4 shadow-soft">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">Temporary password ready</p>
+              <p className="mt-2 text-sm font-semibold text-amber-900">
+                {resetPasswordNotice.studentName} ({resetPasswordNotice.studentEmail || resetPasswordNotice.studentId})
+              </p>
+              <p className="mt-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 font-mono text-base font-semibold tracking-[0.12em] text-ink-900">
+                {resetPasswordNotice.temporaryPassword}
+              </p>
+              <p className="mt-2 text-sm text-amber-800">
+                Copy this and share it with the student. They can log in with their registered mobile number and this password.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => copyTemporaryPassword(resetPasswordNotice.temporaryPassword)}
+                className="rounded-full bg-ink-900 px-4 py-2 text-xs font-semibold text-white"
+              >
+                Copy password
+              </button>
+              <button
+                type="button"
+                onClick={() => setResetPasswordNotice(null)}
+                className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-ink-900"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {activeTab === "library" ? (
         <div className="space-y-6">
@@ -762,6 +854,22 @@ export function AdminReviewWorkspace() {
                           ))
                         )}
                       </div>
+                    </div>
+                    <div className="mt-4 flex flex-wrap justify-end">
+                      <button
+                        type="button"
+                        onClick={() => resetStudentPassword(student.id)}
+                        className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800"
+                      >
+                        Reset password
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteStudent(student.id)}
+                        className="ml-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700"
+                      >
+                        Delete student and data
+                      </button>
                     </div>
                   </article>
                 ))

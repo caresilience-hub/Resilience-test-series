@@ -21,11 +21,45 @@ export async function GET(request: NextRequest) {
 
   const student = await prisma.student.findUnique({
     where: { userId: session.userId },
-    include: {
-      user: true,
+    select: {
+      id: true,
+      userId: true,
+      selectedSubjects: true,
+      subjectTimelines: true,
+      courseFee: true,
+      refundableDeposit: true,
+      totalPaid: true,
+      paymentStatus: true,
+      refundStatus: true,
+      sincerityScore: true,
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          surname: true,
+          mobile: true,
+          email: true
+        }
+      },
       enrollments: true,
       submissions: { orderBy: { createdAt: "desc" } },
-      paperAccesses: { include: { subjectPaper: true } }
+      paperAccesses: {
+        select: {
+          id: true,
+          canDownloadPaper: true,
+          canDownloadAnswer: true,
+          subjectPaper: {
+            select: {
+              id: true,
+              subject: true,
+              title: true,
+              kind: true,
+              fileUrl: true,
+              sampleAnswerUrl: true
+            }
+          }
+        }
+      }
     }
   });
 

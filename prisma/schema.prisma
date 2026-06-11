@@ -38,6 +38,7 @@ model User {
   surname     String?
   mobile      String?    @unique
   email       String     @unique
+  passwordHash String?
   role        UserRole   @default(STUDENT)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

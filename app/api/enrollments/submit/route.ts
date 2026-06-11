@@ -5,6 +5,7 @@ import { shouldUseSecureCookies } from "@/lib/cookies";
 import { serializePaperTimelines, serializeSelectedSubjects } from "@/lib/student-state";
 import { parseDisplayDate } from "@/lib/pricing";
 import { upsertStudentIdentity } from "@/lib/student-user";
+import { hashPassword } from "@/lib/password";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
   const surname = String(body.surname ?? "").trim();
   const mobile = String(body.mobile ?? "").trim();
   const email = String(body.email ?? "").trim().toLowerCase();
+  const password = String(body.password ?? "");
   const selectedSubjects = Array.isArray(body.selectedSubjects) ? body.selectedSubjects.map((value: string) => String(value).trim()).filter(Boolean) : [];
   const paperDates = body.paperDates && typeof body.paperDates === "object" ? body.paperDates : {};
   const pricing = body.pricing ?? {};
@@ -24,6 +26,10 @@ export async function POST(request: NextRequest) {
 
   if (!email.includes("@")) {
     return NextResponse.json({ message: "Please enter a valid email address." }, { status: 400 });
+  }
+
+  if (password.trim().length < 8) {
+    return NextResponse.json({ message: "Please create a password with at least 8 characters." }, { status: 400 });
   }
 
   if (!firstName || !surname || !mobile || !email) {
@@ -45,11 +51,13 @@ export async function POST(request: NextRequest) {
   }
 
   const result = await prisma.$transaction(async (transaction) => {
+    const passwordHash = await hashPassword(password);
     const user = await upsertStudentIdentity(transaction, {
       firstName,
       surname,
       mobile,
-      email
+      email,
+      passwordHash
     });
 
     const student = await transaction.student.upsert({
