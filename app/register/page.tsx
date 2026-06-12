@@ -51,6 +51,25 @@ export default function RegisterPage() {
   );
   const canProceed = form.selectedSubjects.length > 0 && form.selectedSubjects.every((subject) => Boolean(form.paperDates[subject]));
 
+  function getDetailsValidationMessage() {
+    if (!form.firstName.trim()) return "Please enter your First Name.";
+    if (!form.surname.trim()) return "Please enter your Last Name.";
+    if (mobileDigits.length !== 10) return "Please enter a valid 10-digit Mobile Number.";
+    if (!emailHasAt) return "Please enter a valid Email ID.";
+    if (form.password.length < 8) return "Please create a password with at least 8 characters.";
+    if (form.password !== form.confirmPassword) return "Your passwords do not match.";
+    return "";
+  }
+
+  function getPaperValidationMessage() {
+    if (form.selectedSubjects.length === 0) return "Please select at least one paper.";
+
+    const missingDate = form.selectedSubjects.find((subject) => !String(form.paperDates[subject] ?? "").trim());
+    if (missingDate) return `Please enter a paper date for ${missingDate}.`;
+
+    return "";
+  }
+
   function toggleSubject(subject: string) {
     setForm((current) => {
       const selected = current.selectedSubjects.includes(subject)
@@ -71,14 +90,16 @@ export default function RegisterPage() {
   }
 
   async function submitForConfirmation() {
-    if (!canProceed) {
-      setStatus("Please select a paper and enter a date for every selected paper before continuing.");
+    const detailsMessage = getDetailsValidationMessage();
+    if (detailsMessage) {
+      setStatus(detailsMessage);
+      setStep("details");
       return;
     }
 
-    if (!detailsComplete) {
-      setStatus("Please complete your contact number, email address, and password before submitting.");
-      setStep("details");
+    const paperMessage = getPaperValidationMessage();
+    if (paperMessage) {
+      setStatus(paperMessage);
       return;
     }
 
@@ -135,17 +156,21 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => {
-                  if (detailsComplete && canProceed) {
-                    setStep("upi");
-                    setStatus("");
-                  } else {
-                    setStatus(
-                      detailsComplete
-                        ? "Please select papers and set dates before opening the UPI tab."
-                      : "Please complete First Name, Last Name, Mobile Number, Email ID, and Password before opening the UPI tab."
-                  );
-                  }
-                }}
+                const detailsMessage = getDetailsValidationMessage();
+                if (detailsMessage) {
+                  setStatus(detailsMessage);
+                  return;
+                }
+
+                const paperMessage = getPaperValidationMessage();
+                if (paperMessage) {
+                  setStatus(paperMessage);
+                  return;
+                }
+
+                setStep("upi");
+                setStatus("");
+              }}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                 step === "upi" ? "bg-ink-900 text-white" : "border border-black/10 bg-white text-ink-900"
               }`}
@@ -317,12 +342,20 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (canProceed) {
-                    setStep("upi");
-                    setStatus("");
-                  } else {
-                    setStatus("Please select papers and dates before opening the UPI tab.");
+                  const detailsMessage = getDetailsValidationMessage();
+                  if (detailsMessage) {
+                    setStatus(detailsMessage);
+                    return;
                   }
+
+                  const paperMessage = getPaperValidationMessage();
+                  if (paperMessage) {
+                    setStatus(paperMessage);
+                    return;
+                  }
+
+                  setStep("upi");
+                  setStatus("");
                 }}
                 className="inline-flex w-full items-center justify-center rounded-full bg-ink-900 px-5 py-4 text-sm font-semibold text-white transition hover:bg-ink-800"
               >
