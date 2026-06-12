@@ -112,7 +112,7 @@ export default function StudentLoginPage() {
         {showForgot ? (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-900">
             Please mail <span className="font-semibold">caresilience@gmail.com</span> with subject{" "}
-            <span className="font-semibold">"Forgot password"</span> and include your registered email ID.
+            <span className="font-semibold">&quot;Forgot password&quot;</span> and include your registered email ID.
           </div>
         ) : null}
       </div>

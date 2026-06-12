@@ -1,18 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Manrope, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope"
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-cormorant"
-});
 
 export const metadata: Metadata = {
   title: "Resilience Test Series",
@@ -25,7 +13,15 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${cormorant.variable}`}>
+    <html
+      lang="en"
+      style={
+        {
+          ["--font-manrope" as any]: '"Inter", "Segoe UI", Arial, sans-serif',
+          ["--font-cormorant" as any]: '"Georgia", "Times New Roman", serif'
+        } as any
+      }
+    >
       <body className="font-sans text-ink-900 antialiased">{children}</body>
     </html>
   );
