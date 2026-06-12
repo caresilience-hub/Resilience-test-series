@@ -2,7 +2,7 @@ export const landingStats = [
   { label: 'Structured test cycles', value: 'Give papers as per your timeline' },
   {
     label: 'Evaluators',
-    value: '1. CA Rishabh Daga - AIR 50 in CA Inter.\n2. CA Swarali Chandorkar.'
+    value: '1. CA Rishabh Daga\nAIR 50 in CA Inter\n2. CA Swarali Chandorkar'
   },
   { label: 'Refund deposit', value: 'Nominal deposit to keep you motivated to follow your plan' }
 ];

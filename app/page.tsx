@@ -40,9 +40,9 @@ export default function HomePage() {
                   <div key={item.label} className="rounded-2xl border border-white/50 bg-white/80 p-4">
                     <p className="text-xs uppercase tracking-[0.26em] text-ink-500">{item.label}</p>
                     {item.label === "Evaluators" ? (
-                      <div className="mt-2 space-y-1 text-sm font-semibold leading-6 text-ink-900">
+                      <div className="mt-2 max-w-[15rem] space-y-1 text-sm font-semibold leading-6 text-ink-900">
                         {item.value.split("\n").map((line) => (
-                          <p key={line} className="whitespace-nowrap">
+                          <p key={line} className="whitespace-normal">
                             {line}
                           </p>
                         ))}
