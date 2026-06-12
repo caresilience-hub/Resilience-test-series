@@ -1,6 +1,6 @@
 export const subjects = [
   "Financial Reporting",
-  "Financial Management",
+  "Advanced financial Management",
   "Audit",
   "Direct Tax",
   "Indirect Tax",
@@ -14,6 +14,21 @@ export type PricingPlan = {
   courseFee: number;
   refundableDeposit: number;
 };
+
+const subjectAliases: Record<string, string> = {
+  "Financial Management": "Advanced financial Management"
+};
+
+export function normalizeSubjectName(value: string) {
+  const trimmed = String(value ?? "").trim();
+  if (!trimmed) return "";
+
+  return subjectAliases[trimmed] ?? trimmed;
+}
+
+export function normalizeSubjectList(values: string[]) {
+  return values.map((value) => normalizeSubjectName(value));
+}
 
 export const pricingTable: PricingPlan[] = [
   { subjects: 1, courseFee: 199, refundableDeposit: 500 },
