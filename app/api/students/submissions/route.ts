@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SubmissionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { readRoleFromRequest, readSessionFromRequest } from "@/lib/authorization";
-import { formatDate } from "@/lib/pricing";
+import { formatDate, normalizeSubjectName } from "@/lib/pricing";
 import { savePublicUpload } from "@/lib/file-storage";
 
 export const runtime = "nodejs";
@@ -57,7 +57,12 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: "desc" }
   });
 
-  return NextResponse.json({ submissions });
+  return NextResponse.json({
+    submissions: submissions.map((submission) => ({
+      ...submission,
+      subject: normalizeSubjectName(submission.subject)
+    }))
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -93,7 +98,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "You can upload only after admin confirms your payment." }, { status: 403 });
   }
 
-  const enrollment = student.enrollments.find((item) => item.subject === subject);
+  const enrollment = student.enrollments.find((item) => normalizeSubjectName(item.subject) === normalizeSubjectName(subject));
   if (!enrollment) {
     return NextResponse.json({ message: "No scheduled paper found for this subject." }, { status: 404 });
   }
@@ -109,7 +114,7 @@ export async function POST(request: NextRequest) {
   const submission = await prisma.submission.create({
     data: {
       studentId,
-      subject,
+      subject: normalizeSubjectName(subject),
       paperTitle,
       fileUrl,
       status: SubmissionStatus.SUBMITTED

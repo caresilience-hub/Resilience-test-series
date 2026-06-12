@@ -2,7 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { formatDate } from "@/lib/pricing";
+import { formatDate, normalizeSubjectName, subjects as subjectOptions } from "@/lib/pricing";
 
 type SubmissionItem = {
   id: string;
@@ -508,12 +508,9 @@ export function AdminReviewWorkspace() {
               <label className="block">
                 <span className="text-sm font-medium text-ink-700">Subject</span>
                 <select name="subject" className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3">
-                  <option>Financial Reporting</option>
-                  <option>Financial Management</option>
-                  <option>Audit</option>
-                  <option>Direct Tax</option>
-                  <option>Indirect Tax</option>
-                  <option>IBS</option>
+                  {subjectOptions.map((subject) => (
+                    <option key={subject}>{subject}</option>
+                  ))}
                 </select>
               </label>
               <label className="block">
@@ -549,7 +546,7 @@ export function AdminReviewWorkspace() {
                   ) : (
                     questionPapers.map((paper) => (
                       <div key={paper.id} className="rounded-2xl border border-black/5 bg-white p-4">
-                        <p className="font-semibold text-ink-900">{paper.subject}</p>
+                        <p className="font-semibold text-ink-900">{normalizeSubjectName(paper.subject)}</p>
                         <p className="text-sm text-ink-600">{paper.title}</p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <a
@@ -582,7 +579,7 @@ export function AdminReviewWorkspace() {
                   ) : (
                     answerSheets.map((paper) => (
                       <div key={paper.id} className="rounded-2xl border border-black/5 bg-white p-4">
-                        <p className="font-semibold text-ink-900">{paper.subject}</p>
+                        <p className="font-semibold text-ink-900">{normalizeSubjectName(paper.subject)}</p>
                         <p className="text-sm text-ink-600">{paper.title}</p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <a
@@ -672,7 +669,7 @@ export function AdminReviewWorkspace() {
                       <option value="">Select question paper</option>
                       {questionPapers.map((paper) => (
                         <option key={paper.id} value={paper.id}>
-                          {paper.subject} - {paper.title}
+                          {normalizeSubjectName(paper.subject)} - {paper.title}
                         </option>
                       ))}
                     </select>
@@ -701,7 +698,7 @@ export function AdminReviewWorkspace() {
                       <option value="">Select answer sheet</option>
                       {answerSheets.map((paper) => (
                         <option key={paper.id} value={paper.id}>
-                          {paper.subject} - {paper.title}
+                          {normalizeSubjectName(paper.subject)} - {paper.title}
                         </option>
                       ))}
                     </select>
@@ -722,7 +719,7 @@ export function AdminReviewWorkspace() {
                 grants.map((grant) => (
                   <div key={grant.id} className="rounded-2xl border border-black/5 bg-ink-50 p-4">
                     <p className="font-semibold text-ink-900">
-                      {grant.subjectPaper.subject} - {grant.subjectPaper.title}
+                      {normalizeSubjectName(grant.subjectPaper.subject)} - {grant.subjectPaper.title}
                     </p>
                     <p className="mt-1 text-sm text-ink-600">
                       Student: {[grant.student.user.firstName, grant.student.user.surname].filter(Boolean).join(" ") || "Student"}
@@ -828,14 +825,14 @@ export function AdminReviewWorkspace() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       {student.selectedSubjects.map((subject) => (
                         <span key={subject} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink-700">
-                          {subject}
+                          {normalizeSubjectName(subject)}
                         </span>
                       ))}
                     </div>
                     <div className="mt-4 grid gap-2 md:grid-cols-2">
                       {student.enrollments.map((enrollment) => (
                         <div key={enrollment.id} className="rounded-2xl border border-black/5 bg-white p-4">
-                          <p className="font-semibold text-ink-900">{enrollment.subject}</p>
+                          <p className="font-semibold text-ink-900">{normalizeSubjectName(enrollment.subject)}</p>
                           <p className="text-sm text-ink-600">Due date: {formatDate(enrollment.dueDate)}</p>
                           <p className="text-sm text-ink-600">Timeline: {enrollment.timelineDays} days</p>
                         </div>
@@ -849,7 +846,7 @@ export function AdminReviewWorkspace() {
                         ) : (
                           student.submissions.map((submission) => (
                             <p key={submission.id} className="text-sm text-ink-600">
-                              {submission.subject} - {submission.paperTitle} ({submission.status})
+                              {normalizeSubjectName(submission.subject)} - {submission.paperTitle} ({submission.status})
                             </p>
                           ))
                         )}
@@ -1034,7 +1031,7 @@ export function AdminReviewWorkspace() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="font-semibold text-ink-900">{submission.paperTitle}</p>
-                          <p className="text-sm text-ink-600">{submission.subject}</p>
+                          <p className="text-sm text-ink-600">{normalizeSubjectName(submission.subject)}</p>
                           <p className="text-sm text-ink-600">
                             Student: {[submission.student?.user?.firstName, submission.student?.user?.surname].filter(Boolean).join(" ") || submission.student?.user?.email || "Student"}
                           </p>

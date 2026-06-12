@@ -39,7 +39,17 @@ export default function HomePage() {
                 {landingStats.map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/50 bg-white/80 p-4">
                     <p className="text-xs uppercase tracking-[0.26em] text-ink-500">{item.label}</p>
-                    <p className="mt-2 whitespace-pre-line text-lg font-semibold text-ink-900">{item.value}</p>
+                    {item.label === "Evaluators" ? (
+                      <div className="mt-2 space-y-1 text-sm font-semibold leading-6 text-ink-900">
+                        {item.value.split("\n").map((line) => (
+                          <p key={line} className="whitespace-nowrap">
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 whitespace-pre-line text-lg font-semibold text-ink-900">{item.value}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -49,11 +59,11 @@ export default function HomePage() {
               <div className="glass-strong relative rounded-[2rem] p-5 shadow-soft">
                 <div className="rounded-[1.5rem] bg-ink-900 p-6 text-white">
                   <p className="text-xs uppercase tracking-[0.3em] text-white/70">Pricing snapshot</p>
-                  <div className="mt-4 space-y-3">
-                    {pricingTable.map((plan) => (
-                      <div key={plan.subjects} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
-                        <div>
-                          <p className="text-sm font-semibold">{plan.subjects} Subjects</p>
+                <div className="mt-4 space-y-3">
+                  {pricingTable.map((plan) => (
+                    <div key={plan.subjects} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
+                      <div>
+                        <p className="text-sm font-semibold">{plan.subjects} Subjects</p>
                           <p className="text-xs text-white/70">Course fee + refundable deposit</p>
                         </div>
                         <p className="text-sm font-semibold">{plan.courseFee} + {plan.refundableDeposit}</p>
@@ -62,7 +72,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {subjects.slice(0, 4).map((subject) => (
+                  {subjects.map((subject) => (
                     <div key={subject} className="rounded-2xl border border-black/5 bg-white p-4">
                       <p className="text-sm font-semibold text-ink-900">{subject}</p>
                       <p className="mt-1 text-xs text-ink-500">Structured test paper + evaluation workflow</p>

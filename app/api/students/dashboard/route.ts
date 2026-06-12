@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readRoleFromRequest, readSessionFromRequest } from "@/lib/authorization";
 import { calculateEligibility } from "@/lib/business";
-import { formatDate } from "@/lib/pricing";
+import { formatDate, normalizeSubjectName, normalizeSubjectList } from "@/lib/pricing";
 import { parsePaperTimelines, parseSelectedSubjects } from "@/lib/student-state";
 
 function normalizeKind(kind?: string | null) {
@@ -82,13 +82,18 @@ export async function GET(request: NextRequest) {
   const deadlineMet = student.enrollments.every((enrollment: { dueDate: Date }) => enrollment.dueDate >= new Date());
   const eligibility = calculateEligibility(student.sincerityScore, deadlineMet, student.refundStatus === "APPROVED" || student.sincerityScore >= 80);
 
-  const subjectTimelines = parsePaperTimelines(student.subjectTimelines);
-  const selectedSubjects = parseSelectedSubjects(student.selectedSubjects);
+  const subjectTimelines = Object.fromEntries(
+    Object.entries(parsePaperTimelines(student.subjectTimelines)).map(([subject, timeline]) => [
+      normalizeSubjectName(subject),
+      timeline
+    ])
+  );
+  const selectedSubjects = normalizeSubjectList(parseSelectedSubjects(student.selectedSubjects));
 
   const upcomingPapers = student.enrollments.length
     ? student.enrollments.map((enrollment: { subject: string; dueDate: Date }) => ({
-        subject: enrollment.subject,
-        title: `${enrollment.subject} Paper`,
+        subject: normalizeSubjectName(enrollment.subject),
+        title: `${normalizeSubjectName(enrollment.subject)} Paper`,
         dueIn: `${Math.max(0, Math.ceil((enrollment.dueDate.getTime() - Date.now()) / 86400000))} days`
       }))
     : selectedSubjects.map((subject: string) => ({
@@ -100,8 +105,8 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   const schedule = student.enrollments.map((enrollment: { id: string; subject: string; dueDate: Date }) => ({
     id: enrollment.id,
-    subject: enrollment.subject,
-    title: `${enrollment.subject} Paper`,
+    subject: normalizeSubjectName(enrollment.subject),
+    title: `${normalizeSubjectName(enrollment.subject)} Paper`,
     dueDate: enrollment.dueDate.toISOString(),
     dueDateLabel: formatDate(enrollment.dueDate),
     dueIn: `${Math.max(0, Math.ceil((enrollment.dueDate.getTime() - now.getTime()) / 86400000))} days`,
@@ -110,7 +115,7 @@ export async function GET(request: NextRequest) {
 
   const grantedPapers = student.paperAccesses.map((grant: any) => ({
     id: grant.subjectPaper.id,
-    subject: grant.subjectPaper.subject,
+    subject: normalizeSubjectName(grant.subjectPaper.subject),
     title: grant.subjectPaper.title,
     kind: normalizeKind(grant.subjectPaper.kind) || grant.subjectPaper.kind,
     fileUrl: grant.canDownloadPaper && normalizeKind(grant.subjectPaper.kind) !== "answer-sheet" ? grant.subjectPaper.fileUrl : null,
@@ -132,7 +137,10 @@ export async function GET(request: NextRequest) {
     eligibility,
     upcomingPapers,
     schedule,
-    submissions: student.submissions,
+    submissions: student.submissions.map((submission: { subject: string } & Record<string, unknown>) => ({
+      ...submission,
+      subject: normalizeSubjectName(submission.subject)
+    })),
     grantedPapers,
     refundStatus: student.refundStatus,
     paymentStatus: student.paymentStatus,

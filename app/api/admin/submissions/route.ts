@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { normalizeSubjectName } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 
@@ -38,7 +39,12 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: "desc" }
   });
 
-  return NextResponse.json({ submissions });
+  return NextResponse.json({
+    submissions: submissions.map((submission) => ({
+      ...submission,
+      subject: normalizeSubjectName(submission.subject)
+    }))
+  });
 }
 
 export async function PATCH(request: NextRequest) {

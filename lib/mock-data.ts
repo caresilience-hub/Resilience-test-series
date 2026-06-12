@@ -4,7 +4,7 @@ export const landingStats = [
     label: 'Evaluators',
     value: '1. CA Rishabh Daga - AIR 50 in CA Inter.\n2. CA Swarali Chandorkar.'
   },
-  { label: 'Refund deposit', value: 'Deposit to keep you motivated to follow your plan' }
+  { label: 'Refund deposit', value: 'Nominal deposit to keep you motivated to follow your plan' }
 ];
 
 export const testimonials = [
@@ -36,6 +36,6 @@ export const faqs = [
   },
   {
     q: 'Can I choose different timelines for each paper?',
-    a: 'Yes. Every selected subject can have its own 10-30 day timeline.'
+    a: 'Yes. Every selected subject can have its own timeline.'
   }
 ];

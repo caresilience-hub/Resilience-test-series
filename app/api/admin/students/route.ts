@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { normalizeSubjectName, normalizeSubjectList } from "@/lib/pricing";
 import { parsePaperTimelines, parseSelectedSubjects } from "@/lib/student-state";
 
 export const runtime = "nodejs";
@@ -46,8 +47,21 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     students: students.map((student) => ({
       ...student,
-      selectedSubjects: parseSelectedSubjects(student.selectedSubjects),
-      subjectTimelines: parsePaperTimelines(student.subjectTimelines)
+      selectedSubjects: normalizeSubjectList(parseSelectedSubjects(student.selectedSubjects)),
+      subjectTimelines: Object.fromEntries(
+        Object.entries(parsePaperTimelines(student.subjectTimelines)).map(([subject, timeline]) => [
+          normalizeSubjectName(subject),
+          timeline
+        ])
+      ),
+      enrollments: student.enrollments.map((enrollment) => ({
+        ...enrollment,
+        subject: normalizeSubjectName(enrollment.subject)
+      })),
+      submissions: student.submissions.map((submission) => ({
+        ...submission,
+        subject: normalizeSubjectName(submission.subject)
+      }))
     }))
   });
 }
