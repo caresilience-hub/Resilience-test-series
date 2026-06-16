@@ -4,7 +4,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Resilience Test Series",
-  description: "Modern CA Final online test series with refundable deposit discipline and evaluation support."
+  description: "Modern CA Final online test series with refundable deposit discipline and evaluation support.",
+  verification: {
+    google: "XHRBW8vVE5zgL1Mi5jnZ1pAVx3m8Ix-kXYN_pdFY63g"
+  }
 };
 
 export default function RootLayout({
