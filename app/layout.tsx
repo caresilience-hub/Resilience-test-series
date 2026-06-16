@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { getMetadataBase } from "@/lib/site";
 
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: "Resilience Test Series",
   description: "Modern CA Final online test series with refundable deposit discipline and evaluation support.",
   verification: {

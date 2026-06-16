@@ -1,7 +1,39 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, PrimaryButton, SectionHeading } from "@/components/ui";
 import { faqs, landingStats, testimonials } from "@/lib/mock-data";
 import { pricingTable, subjects } from "@/lib/pricing";
+import { getMetadataBase } from "@/lib/site";
+
+export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
+  title: "Resilience CA Final Test Series | Expert Evaluation & Mentorship",
+  description:
+    "Affordable CA Final test series with detailed evaluation, expert feedback, mentorship and personalized guidance.",
+  openGraph: {
+    title: "Resilience CA Final Test Series | Expert Evaluation & Mentorship",
+    description:
+      "Affordable CA Final test series with detailed evaluation, expert feedback, mentorship and personalized guidance.",
+    url: "/",
+    siteName: "Resilience Test Series",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Resilience Test Series"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Resilience CA Final Test Series | Expert Evaluation & Mentorship",
+    description:
+      "Affordable CA Final test series with detailed evaluation, expert feedback, mentorship and personalized guidance.",
+    images: ["/og-image.svg"]
+  }
+};
 
 const benefits = [
   "Personal evaluation by 2 Chartered Accountants",
