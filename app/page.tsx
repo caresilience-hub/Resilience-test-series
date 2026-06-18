@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge, PrimaryButton, SectionHeading } from "@/components/ui";
 import { faqs, landingStats, testimonials } from "@/lib/mock-data";
-import { pricingTable } from "@/lib/pricing";
+import { formatCurrency, pricingTable } from "@/lib/pricing";
 import { getMetadataBase } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -109,7 +109,7 @@ export default function HomePage() {
                           <p className="text-xs text-white/70">Course fee + refundable deposit</p>
                         </div>
                         <p className="text-sm font-semibold">
-                          {plan.courseFee} + {plan.refundableDeposit}
+                          {formatCurrency(plan.courseFee)} + {formatCurrency(plan.refundableDeposit)}
                         </p>
                       </div>
                     ))}
@@ -190,11 +190,11 @@ export default function HomePage() {
             {pricingTable.map((plan) => (
               <div key={plan.subjects} className="rounded-[1.75rem] border border-black/5 bg-white p-6 shadow-soft">
                 <p className="text-sm uppercase tracking-[0.24em] text-ink-500">{plan.subjects} subjects</p>
-                <p className="mt-4 text-3xl font-semibold text-ink-900">{plan.courseFee}</p>
+                <p className="mt-4 text-3xl font-semibold text-ink-900">{formatCurrency(plan.courseFee)}</p>
                 <p className="mt-1 text-sm text-ink-600">Course fee</p>
                 <div className="mt-5 rounded-2xl bg-amber-50 p-4">
                   <p className="text-sm font-semibold text-amber-900">Refundable deposit</p>
-                  <p className="mt-1 text-2xl font-semibold text-amber-800">{plan.refundableDeposit}</p>
+                  <p className="mt-1 text-2xl font-semibold text-amber-800">{formatCurrency(plan.refundableDeposit)}</p>
                 </div>
               </div>
             ))}
