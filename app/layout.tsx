@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { getMetadataBase } from "@/lib/site";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter"
+});
 
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
@@ -18,16 +24,8 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      style={
-        {
-          ["--font-manrope" as any]: '"Inter", "Segoe UI", Arial, sans-serif',
-          ["--font-cormorant" as any]: '"Georgia", "Times New Roman", serif'
-        } as any
-      }
-    >
-      <body className="font-sans text-ink-900 antialiased">{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body className="font-sans text-slate-900 antialiased">{children}</body>
     </html>
   );
 }

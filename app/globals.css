@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f6f2ea;
-  --surface: rgba(255, 255, 255, 0.8);
-  --surface-strong: rgba(255, 255, 255, 0.94);
-  --text: #11182a;
-  --muted: #5f6b85;
-  --border: rgba(17, 24, 42, 0.08);
-  --accent: #c88b2f;
-  --accent-deep: #7b4c0f;
+  --bg: #f8fafc;
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-strong: rgba(255, 255, 255, 0.96);
+  --text: #0f172a;
+  --muted: #475569;
+  --border: rgba(15, 23, 42, 0.08);
+  --accent: #4f46e5;
+  --accent-deep: #3730a3;
 }
 
 * {
@@ -23,12 +23,12 @@ html {
 
 body {
   margin: 0;
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(200, 139, 47, 0.13), transparent 30%),
-    radial-gradient(circle at top right, rgba(17, 24, 42, 0.07), transparent 26%),
-    linear-gradient(180deg, #fcfaf7 0%, #f5efe6 100%);
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 30%),
+    radial-gradient(circle at top right, rgba(15, 23, 42, 0.06), transparent 28%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
   min-height: 100vh;
 }
 
@@ -38,8 +38,8 @@ a {
 }
 
 .grid-noise {
-  background-image: linear-gradient(rgba(17, 24, 42, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 24, 42, 0.03) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -57,5 +57,5 @@ a {
 .hero-glow {
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 24px 90px rgba(30, 22, 12, 0.18);
+    0 24px 90px rgba(15, 23, 42, 0.12);
 }
