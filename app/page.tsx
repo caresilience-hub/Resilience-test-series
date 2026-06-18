@@ -76,7 +76,7 @@ export default function HomePage() {
                 CA Resilience Test Series
               </h1>
               <p className="mt-3 max-w-2xl text-xl font-medium tracking-[-0.03em] text-indigo-700 sm:text-2xl">
-                Disciple = Success!
+                Discipline = Success!
               </p>
               <p className="mt-5 max-w-2xl text-base leading-8 text-ink-600 sm:text-lg">
                 Enroll in CA Final papers, choose your own timeline, submit sincerely, get evaluated by experts, and work toward a refundable deposit that rewards consistency.
@@ -97,6 +97,10 @@ export default function HomePage() {
                     <p className="mt-2 whitespace-pre-line text-lg font-semibold text-ink-900">{item.value}</p>
                   </div>
                 ))}
+              </div>
+              <div className="mt-4 max-w-md rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-indigo-600">Reach us at</p>
+                <p className="mt-2 text-base font-semibold tracking-[-0.02em] text-ink-900 sm:text-lg">caresilience@gmail.com</p>
               </div>
             </div>
             <div className="relative">
