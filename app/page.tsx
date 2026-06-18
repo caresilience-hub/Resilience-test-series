@@ -48,13 +48,15 @@ const heroProfiles = [
     name: "CA Rishabh Daga",
     subtitle: "AIR 50 CA Inter",
     src: "/rishabh-daga.png",
-    alt: "CA Rishabh Daga portrait"
+    alt: "CA Rishabh Daga portrait",
+    imageClassName: "object-cover object-[center_24%] scale-[1.18]"
   },
   {
     name: "CA Swarali Chandorkar",
     subtitle: "",
     src: "/swarali-chandorkar.jpeg",
-    alt: "CA Swarali Chandorkar portrait"
+    alt: "CA Swarali Chandorkar portrait",
+    imageClassName: "object-cover object-center"
   }
 ] as const;
 
@@ -123,7 +125,7 @@ export default function HomePage() {
                             alt={profile.alt}
                             fill
                             sizes="(max-width: 640px) 9rem, 10rem"
-                            className="object-cover object-center"
+                            className={profile.imageClassName}
                             priority={profile.name === "CA Rishabh Daga"}
                           />
                         </div>
