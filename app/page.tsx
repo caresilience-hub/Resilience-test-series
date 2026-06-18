@@ -73,8 +73,11 @@ export default function HomePage() {
             <div>
               <Badge>Disciplined CA Final Preparation</Badge>
               <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-[-0.05em] leading-[1.05] text-ink-900 sm:text-6xl lg:text-7xl">
-                Resilience Test Series builds exam discipline, not just paper attempts.
+                CA Resilience Test Series
               </h1>
+              <p className="mt-3 max-w-2xl text-xl font-medium tracking-[-0.03em] text-indigo-700 sm:text-2xl">
+                Disciple = Success!
+              </p>
               <p className="mt-5 max-w-2xl text-base leading-8 text-ink-600 sm:text-lg">
                 Enroll in CA Final papers, choose your own timeline, submit sincerely, get evaluated by experts, and work toward a refundable deposit that rewards consistency.
               </p>
