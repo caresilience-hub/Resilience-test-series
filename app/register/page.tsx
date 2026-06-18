@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
 import { Badge } from "@/components/ui";
-import { calculateRegistrationPricing, formatCurrency, formatDateInput, subjects } from "@/lib/pricing";
+import { calculateRegistrationPricing, formatCurrency, formatDateInput, parseDisplayDate, subjects } from "@/lib/pricing";
 
 type FormState = {
   firstName: string;
@@ -18,6 +18,17 @@ type FormState = {
 };
 
 type Step = "details" | "upi";
+
+function formatDateForPicker(value: string) {
+  const parsed = parseDisplayDate(value);
+  if (!parsed) return "";
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -242,18 +253,14 @@ export default function RegisterPage() {
                       </div>
                       <p className="text-sm text-ink-500">Choose the date on which you will give this paper.</p>
                       <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-3][0-9]/[0-1][0-9]/[0-9]{4}"
-                        placeholder="dd/mm/yyyy"
-                        maxLength={10}
-                        value={form.paperDates[subject] ?? ""}
+                        type="date"
+                        value={formatDateForPicker(form.paperDates[subject] ?? "")}
                         onChange={(event) =>
                           setForm((current) => ({
                             ...current,
                             paperDates: {
                               ...current.paperDates,
-                              [subject]: event.target.value.replace(/[^\d/]/g, "")
+                              [subject]: event.target.value
                             }
                           }))
                         }
