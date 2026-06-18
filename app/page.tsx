@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Badge, PrimaryButton, SectionHeading } from "@/components/ui";
 import { faqs, landingStats, testimonials } from "@/lib/mock-data";
-import { pricingTable, subjects } from "@/lib/pricing";
+import { pricingTable } from "@/lib/pricing";
 import { getMetadataBase } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -42,7 +43,24 @@ const benefits = [
   "Refundable deposit incentive for sincere attempts"
 ];
 
+const heroProfiles = [
+  {
+    name: "CA Rishabh Daga",
+    subtitle: "AIR 50 CA Inter",
+    src: "/rishabh-daga.png",
+    alt: "CA Rishabh Daga portrait"
+  },
+  {
+    name: "CA Swarali Chandorkar",
+    subtitle: "",
+    src: "/swarali-chandorkar.jpeg",
+    alt: "CA Swarali Chandorkar portrait"
+  }
+] as const;
+
 export default function HomePage() {
+  const heroStats = landingStats.filter((item) => item.label !== "Evaluators");
+
   return (
     <div className="relative overflow-hidden">
       <div className="absolute inset-0 grid-noise opacity-30" />
@@ -67,21 +85,11 @@ export default function HomePage() {
                   Admin Login
                 </Link>
               </div>
-              <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {landingStats.map((item) => (
+              <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {heroStats.map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/50 bg-white/80 p-4">
                     <p className="text-xs uppercase tracking-[0.26em] text-ink-500">{item.label}</p>
-                    {item.label === "Evaluators" ? (
-                      <div className="mt-2 max-w-[15rem] space-y-1 text-sm font-semibold leading-6 text-ink-900">
-                        {item.value.split("\n").map((line) => (
-                          <p key={line} className="whitespace-normal">
-                            {line}
-                          </p>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="mt-2 whitespace-pre-line text-lg font-semibold text-ink-900">{item.value}</p>
-                    )}
+                    <p className="mt-2 whitespace-pre-line text-lg font-semibold text-ink-900">{item.value}</p>
                   </div>
                 ))}
               </div>
@@ -91,25 +99,41 @@ export default function HomePage() {
               <div className="glass-strong relative rounded-[2rem] p-5 shadow-soft">
                 <div className="rounded-[1.5rem] bg-ink-900 p-6 text-white">
                   <p className="text-xs uppercase tracking-[0.3em] text-white/70">Pricing snapshot</p>
-                <div className="mt-4 space-y-3">
-                  {pricingTable.map((plan) => (
-                    <div key={plan.subjects} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
-                      <div>
-                        <p className="text-sm font-semibold">{plan.subjects} Subjects</p>
+                  <div className="mt-4 space-y-3">
+                    {pricingTable.map((plan) => (
+                      <div key={plan.subjects} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
+                        <div>
+                          <p className="text-sm font-semibold">{plan.subjects} Subjects</p>
                           <p className="text-xs text-white/70">Course fee + refundable deposit</p>
                         </div>
-                        <p className="text-sm font-semibold">{plan.courseFee} + {plan.refundableDeposit}</p>
+                        <p className="text-sm font-semibold">
+                          {plan.courseFee} + {plan.refundableDeposit}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {subjects.map((subject) => (
-                    <div key={subject} className="rounded-2xl border border-black/5 bg-white p-4">
-                      <p className="text-sm font-semibold text-ink-900">{subject}</p>
-                      <p className="mt-1 text-xs text-ink-500">Structured test paper + evaluation workflow</p>
-                    </div>
-                  ))}
+                <div className="mt-4 rounded-[1.5rem] border border-black/5 bg-white p-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {heroProfiles.map((profile) => (
+                      <figure key={profile.name} className="flex flex-col items-center rounded-[1.5rem] border border-black/5 bg-ink-50 p-4 text-center">
+                        <div className="relative h-36 w-36 overflow-hidden rounded-full border-4 border-white bg-white shadow-soft sm:h-40 sm:w-40">
+                          <Image
+                            src={profile.src}
+                            alt={profile.alt}
+                            fill
+                            sizes="(max-width: 640px) 9rem, 10rem"
+                            className="object-cover object-center"
+                            priority={profile.name === "CA Rishabh Daga"}
+                          />
+                        </div>
+                        <figcaption className="mt-4 space-y-1">
+                          <p className="text-sm font-semibold text-ink-900">{profile.name}</p>
+                          {profile.subtitle ? <p className="text-xs text-ink-600">{profile.subtitle}</p> : null}
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
