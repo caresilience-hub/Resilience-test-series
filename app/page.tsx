@@ -223,33 +223,15 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mt-16 grid gap-6 lg:grid-cols-2">
-          <div className="glass-strong rounded-[2rem] p-6 shadow-soft sm:p-8">
-            <SectionHeading eyebrow="FAQ" title="Common questions answered." />
-            <div className="mt-6 space-y-4">
-              {faqs.map((faq) => (
-                <details key={faq.q} className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-                  <summary className="cursor-pointer list-none text-sm font-semibold text-ink-900">{faq.q}</summary>
-                  <p className="mt-3 text-sm leading-7 text-ink-600">{faq.a}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-          <div className="glass-strong rounded-[2rem] p-6 shadow-soft sm:p-8">
-            <SectionHeading eyebrow="Contact" title="Built for future integrations." description="Email notifications, WhatsApp alerts, and direct support hooks are scaffolded so your operations team can connect them later." />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-indigo-600">Email updates</p>
-                <p className="mt-2 text-sm text-ink-700">Deadline and evaluation reminders via SMTP-ready backend routes.</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-indigo-600">WhatsApp</p>
-                <p className="mt-2 text-sm text-ink-700">WhatsApp Business API placeholder included for future integration.</p>
-              </div>
-            </div>
-            <div className="mt-6">
-              <PrimaryButton href="/register">Start Now</PrimaryButton>
-            </div>
+        <section className="mt-16">
+          <SectionHeading eyebrow="FAQ" title="Common questions answered." />
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {faqs.map((faq) => (
+              <details key={faq.q} className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+                <summary className="cursor-pointer list-none text-sm font-semibold text-ink-900">{faq.q}</summary>
+                <p className="mt-3 text-sm leading-7 text-ink-600">{faq.a}</p>
+              </details>
+            ))}
           </div>
         </section>
       </main>
