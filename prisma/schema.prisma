@@ -65,6 +65,7 @@ model Student {
   submissions        Submission[]
   doubtRequests      DoubtRequest[]
   paperAccesses      PaperAccess[]
+  reminderLogs       ReminderLog[]
 }
 
 model Enrollment {
@@ -77,6 +78,7 @@ model Enrollment {
   isLocked       Boolean  @default(false)
   createdAt      DateTime @default(now())
   student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reminderLogs   ReminderLog[]
 }
 
 model SubjectPaper {
@@ -141,6 +143,24 @@ model OtpCode {
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ReminderLog {
+  id           String    @id @default(cuid())
+  dedupeKey    String    @unique
+  kind         String
+  reminderDay  String
+  recipientEmail String
+  subject      String
+  studentId    String?
+  enrollmentId  String?
+  sentAt       DateTime  @default(now())
+  student      Student?  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  enrollment   Enrollment? @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@index([kind, reminderDay])
+  @@index([studentId])
+  @@index([enrollmentId])
 }
 
 model Session {

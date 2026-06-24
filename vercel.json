@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/paper-reminders",
+      "schedule": "30 2 * * *"
+    }
+  ]
+}
