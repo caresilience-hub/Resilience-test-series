@@ -4,7 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
 import { Badge } from "@/components/ui";
-import { calculateRegistrationPricing, formatCurrency, formatDateInput, parseDisplayDate, subjects } from "@/lib/pricing";
+import {
+  calculateRegistrationPricing,
+  calculateUnitTestPricing,
+  formatCurrency,
+  formatDateInput,
+  parseDisplayDate,
+  subjects,
+  unitTestPaperOptions,
+  unitTestSubjects
+} from "@/lib/pricing";
 
 type FormState = {
   firstName: string;
@@ -13,8 +22,9 @@ type FormState = {
   email: string;
   password: string;
   confirmPassword: string;
-  selectedSubjects: string[];
-  paperDates: Record<string, string>;
+  fullLengthSelections: string[];
+  fullLengthDates: Record<string, string>;
+  unitTestSelections: Record<string, string>;
 };
 
 type Step = "details" | "upi";
@@ -30,6 +40,14 @@ function formatDateForPicker(value: string) {
   return `${year}-${month}-${day}`;
 }
 
+function getUnitTestLabel(subject: string, paperValue: string) {
+  const option = unitTestPaperOptions[subject as keyof typeof unitTestPaperOptions]?.find(
+    (item) => item.value === paperValue
+  );
+
+  return option ? `${subject} — ${option.label}` : subject;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("details");
@@ -43,24 +61,37 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    selectedSubjects: [],
-    paperDates: {}
+    fullLengthSelections: [],
+    fullLengthDates: {},
+    unitTestSelections: {}
   });
 
-  const pricing = calculateRegistrationPricing(form.selectedSubjects.length);
   const mobileDigits = form.mobile.replace(/\D/g, "");
   const emailHasAt = form.email.includes("@");
   const passwordReady = form.password.length >= 8;
   const passwordsMatch = form.password === form.confirmPassword;
-  const detailsComplete = Boolean(
-    form.firstName.trim() &&
-      form.surname.trim() &&
-      mobileDigits.length === 10 &&
-      emailHasAt &&
-      passwordReady &&
-      passwordsMatch
-  );
-  const canProceed = form.selectedSubjects.length > 0 && form.selectedSubjects.every((subject) => Boolean(form.paperDates[subject]));
+  const fullLengthCount = form.fullLengthSelections.length;
+  const unitTestCount = Object.values(form.unitTestSelections).filter(Boolean).length;
+  const fullLengthPricing = calculateRegistrationPricing(fullLengthCount);
+  const unitTestPricing = calculateUnitTestPricing(unitTestCount);
+  const totalCourseFee = fullLengthPricing.courseFee + unitTestPricing.courseFee;
+  const totalRefundableDeposit = fullLengthPricing.refundableDeposit + unitTestPricing.refundableDeposit;
+  const totalPayable = fullLengthPricing.totalPayable + unitTestPricing.totalPayable;
+  const totalSelectedPapers = fullLengthCount + unitTestCount;
+
+  const fullLengthSummaries = form.fullLengthSelections.map((subject) => ({
+    label: subject,
+    detail: formatDateInput(form.fullLengthDates[subject] || "") || "Date not set"
+  }));
+
+  const unitTestSummaries = unitTestSubjects
+    .filter((subject) => Boolean(form.unitTestSelections[subject]))
+    .map((subject) => ({
+      label: subject,
+      detail: getUnitTestLabel(subject, form.unitTestSelections[subject])
+    }));
+
+  const paperSummaries = [...fullLengthSummaries, ...unitTestSummaries];
 
   function getDetailsValidationMessage() {
     if (!form.firstName.trim()) return "Please enter your First Name.";
@@ -73,29 +104,30 @@ export default function RegisterPage() {
   }
 
   function getPaperValidationMessage() {
-    if (form.selectedSubjects.length === 0) return "Please select at least one paper.";
+    if (totalSelectedPapers === 0) return "Please select at least one paper.";
 
-    const missingDate = form.selectedSubjects.find((subject) => !String(form.paperDates[subject] ?? "").trim());
+    const missingDate = form.fullLengthSelections.find((subject) => !String(form.fullLengthDates[subject] ?? "").trim());
     if (missingDate) return `Please enter a paper date for ${missingDate}.`;
 
     return "";
   }
 
-  function toggleSubject(subject: string) {
+  function toggleFullLengthSubject(subject: string) {
     setForm((current) => {
-      const selected = current.selectedSubjects.includes(subject)
-        ? current.selectedSubjects.filter((item) => item !== subject)
-        : [...current.selectedSubjects, subject];
+      const isSelected = current.fullLengthSelections.includes(subject);
+      const nextSelections = isSelected
+        ? current.fullLengthSelections.filter((item) => item !== subject)
+        : [...current.fullLengthSelections, subject];
+      const nextDates = { ...current.fullLengthDates };
 
-      const paperDates = { ...current.paperDates };
-      if (!selected.includes(subject)) {
-        delete paperDates[subject];
+      if (isSelected) {
+        delete nextDates[subject];
       }
 
       return {
         ...current,
-        selectedSubjects: selected,
-        paperDates
+        fullLengthSelections: nextSelections,
+        fullLengthDates: nextDates
       };
     });
   }
@@ -117,14 +149,39 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     setStatus("Submitting your enrollment for admin confirmation...");
 
+    const fullLengthSelections = form.fullLengthSelections.map((subject) => ({
+      subject,
+      date: form.fullLengthDates[subject]
+    }));
+
+    const unitTests = unitTestSubjects
+      .filter((subject) => Boolean(form.unitTestSelections[subject]))
+      .map((subject) => ({
+        subject,
+        paper: form.unitTestSelections[subject],
+        label: getUnitTestLabel(subject, form.unitTestSelections[subject])
+      }));
+
     try {
       const response = await fetch("/api/enrollments/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          password: form.password,
-          pricing
+          selectedSubjects: [
+            ...fullLengthSelections.map((item) => item.subject),
+            ...unitTests.map((item) => item.label)
+          ],
+          paperDates: Object.fromEntries(fullLengthSelections.map((item) => [item.subject, item.date])),
+          paperSelections: {
+            fullLength: fullLengthSelections,
+            unitTests
+          },
+          pricing: {
+            courseFee: totalCourseFee,
+            refundableDeposit: totalRefundableDeposit,
+            totalPayable
+          }
         })
       });
 
@@ -222,7 +279,7 @@ export default function RegisterPage() {
                       placeholder={field.placeholder}
                       required
                       minLength={field.key === "password" || field.key === "confirmPassword" ? 8 : undefined}
-                      className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-amber-300 focus:bg-white"
+                      className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:bg-white"
                     />
                   </label>
                 ))}
@@ -230,60 +287,123 @@ export default function RegisterPage() {
 
               <h2 className="mt-7 text-lg font-semibold text-ink-900">Select papers</h2>
               <p className="mt-2 text-sm text-ink-600">Tick any combination of papers to calculate the fee automatically.</p>
-              <div className="mt-4 space-y-2.5">
-                {subjects.map((subject) => {
-                  const active = form.selectedSubjects.includes(subject);
-                  return (
-                    <label
-                      key={subject}
-                      className={`grid gap-2.5 rounded-2xl border px-4 py-3.5 text-left transition sm:grid-cols-[auto_1fr_190px] sm:items-center ${
-                        active
-                          ? "border-amber-300 bg-amber-50 shadow-soft"
-                          : "border-black/10 bg-white hover:border-ink-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={active}
-                          onChange={() => toggleSubject(subject)}
-                          className="h-4 w-4 rounded border-black/20 accent-amber-600"
-                        />
-                        <span className="text-sm font-semibold text-ink-900">{subject}</span>
-                      </div>
-                      <p className="text-sm text-ink-500">Choose the date on which you will give this paper.</p>
-                      <input
-                        type="date"
-                        value={formatDateForPicker(form.paperDates[subject] ?? "")}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            paperDates: {
-                              ...current.paperDates,
-                              [subject]: event.target.value
+
+              <div className="mt-4 space-y-4">
+                <details open className="glass-soft overflow-hidden rounded-[1.5rem] border border-black/10 p-4">
+                  <summary className="cursor-pointer list-none text-base font-semibold text-ink-900">
+                    <span className="flex items-center justify-between gap-3">
+                      <span>Full Length Mock Tests</span>
+                      <span className="text-xs font-medium uppercase tracking-[0.24em] text-ink-500">Existing list</span>
+                    </span>
+                  </summary>
+                  <div className="mt-4 space-y-2.5">
+                    {subjects.map((subject) => {
+                      const active = form.fullLengthSelections.includes(subject);
+                      return (
+                        <label
+                          key={subject}
+                          className={`grid gap-2.5 rounded-2xl border px-4 py-3.5 text-left transition sm:grid-cols-[auto_1fr_190px] sm:items-center ${
+                            active ? "border-indigo-300 bg-indigo-50 shadow-soft" : "border-black/10 bg-white hover:border-ink-300"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={active}
+                              onChange={() => toggleFullLengthSubject(subject)}
+                              className="h-4 w-4 rounded border-black/20 accent-indigo-600"
+                            />
+                            <span className="text-sm font-semibold text-ink-900">{subject}</span>
+                          </div>
+                          <p className="text-sm text-ink-500">Choose the date on which you will give this paper.</p>
+                          <input
+                            type="date"
+                            value={formatDateForPicker(form.fullLengthDates[subject] ?? "")}
+                            onChange={(event) =>
+                              setForm((current) => ({
+                                ...current,
+                                fullLengthDates: {
+                                  ...current.fullLengthDates,
+                                  [subject]: event.target.value
+                                }
+                              }))
                             }
-                          }))
-                        }
-                        disabled={!active}
-                        required={active}
-                        className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-amber-300 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400"
-                      />
-                    </label>
-                  );
-                })}
+                            disabled={!active}
+                            required={active}
+                            className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-indigo-400 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400"
+                          />
+                        </label>
+                      );
+                    })}
+                  </div>
+                </details>
+
+                <details open className="glass-soft overflow-hidden rounded-[1.5rem] border border-black/10 p-4">
+                  <summary className="cursor-pointer list-none text-base font-semibold text-ink-900">
+                    <span className="flex items-center justify-between gap-3">
+                      <span>Unit tests (50 marks each)</span>
+                      <span className="text-xs font-medium uppercase tracking-[0.24em] text-ink-500">Paper options</span>
+                    </span>
+                  </summary>
+                  <div className="mt-4 space-y-3">
+                    {unitTestSubjects.map((subject) => {
+                      const selectedPaper = form.unitTestSelections[subject] ?? "";
+                      return (
+                        <div key={subject} className="rounded-2xl border border-black/10 bg-white px-4 py-4 transition hover:border-ink-300">
+                          <div className="grid gap-3 lg:grid-cols-[1fr_320px] lg:items-center">
+                            <div>
+                              <p className="text-sm font-semibold text-ink-900">{subject}</p>
+                              <p className="mt-1 text-sm text-ink-500">Choose one paper from the dropdown.</p>
+                            </div>
+                            <label className="space-y-1.5">
+                              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600">Select paper</span>
+                              <select
+                                value={selectedPaper}
+                                onChange={(event) =>
+                                  setForm((current) => ({
+                                    ...current,
+                                    unitTestSelections: {
+                                      ...current.unitTestSelections,
+                                      [subject]: event.target.value
+                                    }
+                                  }))
+                                }
+                                className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-indigo-400"
+                              >
+                                <option value="">Choose paper</option>
+                                {unitTestPaperOptions[subject].map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </details>
               </div>
+
+              <p className="mt-4 text-sm text-ink-600">
+                If you want customized tests, mail us at{" "}
+                <a href="mailto:caresilience@gmail.com" className="font-semibold text-ink-900 underline decoration-indigo-300 underline-offset-4">
+                  caresilience@gmail.com
+                </a>
+              </p>
             </>
           ) : (
-            <div className="mt-5 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5">
-              <p className="text-xs uppercase tracking-[0.28em] text-amber-800">UPI payment</p>
+            <div className="mt-5 rounded-[1.5rem] border border-indigo-200 bg-indigo-50 p-5">
+              <p className="text-xs uppercase tracking-[0.28em] text-indigo-700">UPI payment</p>
               <p className="mt-2 text-sm leading-6 text-ink-700">
                 Scan the QR code below with any UPI app, then submit this enrollment for admin confirmation.
               </p>
               <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-white/70 bg-white p-4 shadow-sm">
                 {qrMissing ? (
-                  <div className="rounded-[1.25rem] border border-dashed border-amber-300 bg-amber-50 px-4 py-8 text-center">
-                    <p className="text-sm font-semibold text-amber-900">Add your QR image</p>
-                    <p className="mt-1 text-sm text-amber-800">Place the scanner file at <code>/public/upi-qr.png</code> to show it here.</p>
+                  <div className="rounded-[1.25rem] border border-dashed border-indigo-300 bg-indigo-50 px-4 py-8 text-center">
+                    <p className="text-sm font-semibold text-indigo-900">Add your QR image</p>
+                    <p className="mt-1 text-sm text-indigo-800">Place the scanner file at <code>/public/upi-qr.png</code> to show it here.</p>
                   </div>
                 ) : (
                   <div className="flex justify-center">
@@ -298,7 +418,7 @@ export default function RegisterPage() {
               </div>
               <div className="mt-4 rounded-2xl bg-white p-4">
                 <p className="text-xs uppercase tracking-[0.24em] text-ink-500">Amount to transfer</p>
-                <p className="mt-2 text-3xl font-semibold text-ink-900">{formatCurrency(pricing.totalPayable)}</p>
+                <p className="mt-2 text-3xl font-semibold text-ink-900">{formatCurrency(totalPayable)}</p>
               </div>
               <p className="mt-4 text-sm text-ink-600">
                 Once you submit, your dashboard will show <span className="font-semibold text-ink-900">waiting for payment confirmation</span> until an admin approves it.
@@ -312,30 +432,34 @@ export default function RegisterPage() {
           <div className="mt-4 space-y-3">
             <div className="rounded-2xl bg-ink-900 p-4 text-white">
               <p className="text-xs uppercase tracking-[0.26em] text-white/70">Selected papers</p>
-              <p className="mt-2 text-2xl font-semibold">{pricing.count}</p>
+              <p className="mt-2 text-2xl font-semibold">{totalSelectedPapers}</p>
+              <p className="mt-1 text-xs text-white/70">
+                {fullLengthCount} full length • {unitTestCount} unit tests
+              </p>
             </div>
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <p className="text-xs uppercase tracking-[0.26em] text-ink-500">Course fee</p>
-              <p className="mt-2 text-2xl font-semibold text-ink-900">{formatCurrency(pricing.courseFee)}</p>
+              <p className="mt-2 text-2xl font-semibold text-ink-900">{formatCurrency(totalCourseFee)}</p>
             </div>
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <p className="text-xs uppercase tracking-[0.26em] text-ink-500">Refundable deposit</p>
-              <p className="mt-2 text-2xl font-semibold text-amber-700">{formatCurrency(pricing.refundableDeposit)}</p>
+              <p className="mt-2 text-2xl font-semibold text-amber-700">{formatCurrency(totalRefundableDeposit)}</p>
             </div>
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-xs uppercase tracking-[0.26em] text-amber-800">Total payable</p>
-              <p className="mt-2 text-3xl font-semibold text-ink-900">{formatCurrency(pricing.totalPayable)}</p>
+            <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+              <p className="text-xs uppercase tracking-[0.26em] text-indigo-700">Total payable</p>
+              <p className="mt-2 text-3xl font-semibold text-ink-900">{formatCurrency(totalPayable)}</p>
             </div>
             <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <p className="text-sm font-semibold text-ink-900">Selected paper dates</p>
+              <p className="text-sm font-semibold text-ink-900">Selected paper details</p>
               <div className="mt-3 space-y-2">
-                {form.selectedSubjects.length === 0 ? (
+                {paperSummaries.length === 0 ? (
                   <p className="text-sm text-ink-500">No papers selected yet.</p>
                 ) : (
-                  form.selectedSubjects.map((subject) => (
-                    <p key={subject} className="text-sm text-ink-600">
-                      {subject}: {formatDateInput(form.paperDates[subject] || "") || "Date not set"}
-                    </p>
+                  paperSummaries.map((item) => (
+                    <div key={`${item.label}-${item.detail}`} className="rounded-xl bg-ink-50 px-3 py-2">
+                      <p className="text-sm font-medium text-ink-900">{item.label}</p>
+                      <p className="text-sm text-ink-600">{item.detail}</p>
+                    </div>
                   ))
                 )}
               </div>

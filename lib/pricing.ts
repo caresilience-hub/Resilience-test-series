@@ -7,7 +7,44 @@ export const subjects = [
   "IBS"
 ] as const;
 
+export const unitTestSubjects = [
+  "Financial Reporting",
+  "Advanced financial Management",
+  "Audit",
+  "Direct Tax",
+  "Indirect Tax"
+] as const;
+
 export type SubjectName = (typeof subjects)[number];
+export type UnitTestSubjectName = (typeof unitTestSubjects)[number];
+
+export const unitTestPaperOptions: Record<UnitTestSubjectName, { value: string; label: string }[]> = {
+  "Financial Reporting": [
+    { value: "paper-1", label: "Paper 1 - Module 1, 2 and 3" },
+    { value: "paper-2", label: "Paper 2 - Module 4" },
+    { value: "paper-3", label: "Paper 3 - Module 5" }
+  ],
+  "Advanced financial Management": [
+    { value: "paper-1", label: "Paper 1 - Chapter 1-5" },
+    { value: "paper-2", label: "Paper 2 - Chapter 6-9" },
+    { value: "paper-3", label: "Paper 3 - Chapter 10-15" }
+  ],
+  Audit: [
+    { value: "paper-1", label: "Paper 1 - Module 1" },
+    { value: "paper-2", label: "Paper 2 - Module 2" },
+    { value: "paper-3", label: "Paper 3 - Module 3" }
+  ],
+  "Direct Tax": [
+    { value: "paper-1", label: "Paper 1 - Module 1" },
+    { value: "paper-2", label: "Paper 2 - Module 2" },
+    { value: "paper-3", label: "Paper 3 - Module 3 & 4" }
+  ],
+  "Indirect Tax": [
+    { value: "paper-1", label: "Paper 1 - Module 1" },
+    { value: "paper-2", label: "Paper 2 - Module 2" },
+    { value: "paper-3", label: "Paper 3 - Module 3 & 4" }
+  ]
+};
 
 export type PricingPlan = {
   subjects: number;
@@ -57,6 +94,29 @@ export function calculateRegistrationPricing(selectedCount: number) {
   }
 
   const courseFee = count * 200 - 1;
+  const refundableDeposit = count <= 3 ? 500 : 1000;
+
+  return {
+    count,
+    courseFee,
+    refundableDeposit,
+    totalPayable: courseFee + refundableDeposit
+  };
+}
+
+export function calculateUnitTestPricing(selectedCount: number) {
+  const count = Math.max(selectedCount, 0);
+
+  if (count === 0) {
+    return {
+      count,
+      courseFee: 0,
+      refundableDeposit: 0,
+      totalPayable: 0
+    };
+  }
+
+  const courseFee = count * 150 - 1;
   const refundableDeposit = count <= 3 ? 500 : 1000;
 
   return {

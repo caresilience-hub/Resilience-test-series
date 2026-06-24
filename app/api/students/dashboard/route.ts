@@ -9,6 +9,11 @@ function normalizeKind(kind?: string | null) {
   return kind?.toLowerCase().trim().replace(/\s+/g, "-") ?? "";
 }
 
+function buildPaperTitle(subject: string) {
+  const normalized = normalizeSubjectName(subject);
+  return /\bpaper\b/i.test(normalized) ? normalized : `${normalized} Paper`;
+}
+
 export async function GET(request: NextRequest) {
   if (readRoleFromRequest(request) !== "STUDENT") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -93,12 +98,12 @@ export async function GET(request: NextRequest) {
   const upcomingPapers = student.enrollments.length
     ? student.enrollments.map((enrollment: { subject: string; dueDate: Date }) => ({
         subject: normalizeSubjectName(enrollment.subject),
-        title: `${normalizeSubjectName(enrollment.subject)} Paper`,
+        title: buildPaperTitle(enrollment.subject),
         dueIn: `${Math.max(0, Math.ceil((enrollment.dueDate.getTime() - Date.now()) / 86400000))} days`
       }))
     : selectedSubjects.map((subject: string) => ({
         subject,
-        title: `${subject} Paper`,
+        title: buildPaperTitle(subject),
         dueIn: `${subjectTimelines?.[subject] ?? 0} days`
       }));
 
@@ -106,7 +111,7 @@ export async function GET(request: NextRequest) {
   const schedule = student.enrollments.map((enrollment: { id: string; subject: string; dueDate: Date }) => ({
     id: enrollment.id,
     subject: normalizeSubjectName(enrollment.subject),
-    title: `${normalizeSubjectName(enrollment.subject)} Paper`,
+    title: buildPaperTitle(enrollment.subject),
     dueDate: enrollment.dueDate.toISOString(),
     dueDateLabel: formatDate(enrollment.dueDate),
     dueIn: `${Math.max(0, Math.ceil((enrollment.dueDate.getTime() - now.getTime()) / 86400000))} days`,

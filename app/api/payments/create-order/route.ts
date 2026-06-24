@@ -3,35 +3,40 @@ import { prisma } from "@/lib/prisma";
 import { parseDisplayDate } from "@/lib/pricing";
 import { serializePaperTimelines, serializeSelectedSubjects } from "@/lib/student-state";
 import { upsertStudentIdentity } from "@/lib/student-user";
+import { parsePaperSelections } from "@/lib/paper-selections";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const totalPayable = Number(body.totalPayable ?? body.pricing?.totalPayable ?? 0);
-  const selectedSubjects = Array.isArray(body.selectedSubjects) ? body.selectedSubjects : [];
-  const paperDates = body.paperDates ?? {};
   const firstName = String(body.firstName ?? "").trim();
   const surname = String(body.surname ?? "").trim();
   const mobile = String(body.mobile ?? "").trim();
   const email = String(body.email ?? "").trim().toLowerCase();
+  const selection = parsePaperSelections(body);
 
   if (!totalPayable || totalPayable < 1) {
     return NextResponse.json({ error: "Invalid payment amount." }, { status: 400 });
   }
 
-  if (selectedSubjects.length < 1) {
+  const missingUnitTest = selection.unitTests.find((item) => item.subject && !item.paper);
+  if (missingUnitTest) {
+    return NextResponse.json({ error: `Please select a paper for ${missingUnitTest.subject}.` }, { status: 400 });
+  }
+
+  if (selection.selectedSubjects.length < 1) {
     return NextResponse.json({ error: "Please select at least one paper." }, { status: 400 });
   }
 
-  const missingDate = selectedSubjects.find((subject: string) => !String(paperDates[subject] ?? "").trim());
+  const missingDate = selection.fullLength.find((item) => !String(item.date ?? "").trim());
   if (missingDate) {
-    return NextResponse.json({ error: `Please enter a paper date for ${missingDate}.` }, { status: 400 });
+    return NextResponse.json({ error: `Please enter a paper date for ${missingDate.subject}.` }, { status: 400 });
   }
 
-  const invalidDate = selectedSubjects.find((subject: string) => !parseDisplayDate(String(paperDates[subject] ?? "")));
+  const invalidDate = selection.fullLength.find((item) => !parseDisplayDate(String(item.date ?? "")));
   if (invalidDate) {
-    return NextResponse.json({ error: `Please enter ${invalidDate} in dd/mm/yyyy format.` }, { status: 400 });
+    return NextResponse.json({ error: `Please enter ${invalidDate.subject} in dd/mm/yyyy format.` }, { status: 400 });
   }
 
   if (email) {
@@ -46,16 +51,16 @@ export async function POST(request: NextRequest) {
       const student = await transaction.student.upsert({
         where: { userId: user.id },
         update: {
-          selectedSubjects: serializeSelectedSubjects(selectedSubjects),
-          subjectTimelines: serializePaperTimelines(paperDates as Record<string, string>),
+          selectedSubjects: serializeSelectedSubjects(selection.selectedSubjects),
+          subjectTimelines: serializePaperTimelines(selection.paperDates),
           courseFee: Number(body.pricing?.courseFee ?? 0),
           refundableDeposit: Number(body.pricing?.refundableDeposit ?? 0),
           totalPaid: 0
         },
         create: {
           userId: user.id,
-          selectedSubjects: serializeSelectedSubjects(selectedSubjects),
-          subjectTimelines: serializePaperTimelines(paperDates as Record<string, string>),
+          selectedSubjects: serializeSelectedSubjects(selection.selectedSubjects),
+          subjectTimelines: serializePaperTimelines(selection.paperDates),
           courseFee: Number(body.pricing?.courseFee ?? 0),
           refundableDeposit: Number(body.pricing?.refundableDeposit ?? 0),
           totalPaid: 0
@@ -67,16 +72,25 @@ export async function POST(request: NextRequest) {
       });
 
       await transaction.enrollment.createMany({
-        data: selectedSubjects.map((subject: string) => {
-          const dueDate = parseDisplayDate(String(paperDates[subject] ?? "")) as Date;
-          return {
+        data: [
+          ...selection.fullLength.map((item) => {
+            const dueDate = parseDisplayDate(item.date) as Date;
+            return {
+              studentId: student.id,
+              subject: item.subject,
+              timelineDays: Math.max(10, Math.min(30, Math.ceil((dueDate.getTime() - Date.now()) / 86400000) || 10)),
+              startDate: new Date(),
+              dueDate
+            };
+          }),
+          ...selection.unitTests.map((item) => ({
             studentId: student.id,
-            subject,
-            timelineDays: Math.max(10, Math.min(30, Math.ceil((dueDate.getTime() - Date.now()) / 86400000) || 10)),
+            subject: item.label,
+            timelineDays: 1,
             startDate: new Date(),
-            dueDate
-          };
-        })
+            dueDate: new Date()
+          }))
+        ]
       });
     });
   }
@@ -97,13 +111,13 @@ export async function POST(request: NextRequest) {
     body: JSON.stringify({
       amount: totalPayable * 100,
       currency: "INR",
-      receipt: `receipt_${Date.now()}`,
-      notes: {
-        studentEmail: body.email,
-        studentName: `${body.firstName ?? ""} ${body.surname ?? ""}`.trim(),
-        selectedPapers: String(body.selectedSubjects?.length ?? 0)
-      }
-    })
+        receipt: `receipt_${Date.now()}`,
+        notes: {
+          studentEmail: body.email,
+          studentName: `${body.firstName ?? ""} ${body.surname ?? ""}`.trim(),
+          selectedPapers: String(selection.selectedSubjects.length)
+        }
+      })
   });
 
   const order = await response.json();
