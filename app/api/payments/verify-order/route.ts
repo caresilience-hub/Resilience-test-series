@@ -47,8 +47,7 @@ export async function POST(request: NextRequest) {
     surname,
     mobile,
     email,
-    selectedSubjects,
-    paperDates,
+    selection,
     pricing,
     secureCookie: shouldUseSecureCookies(request)
   });
@@ -59,8 +58,7 @@ async function saveEnrollmentAndSession({
   surname,
   mobile,
   email,
-  selectedSubjects,
-  paperDates,
+  selection,
   pricing,
   secureCookie
 }: {
@@ -68,8 +66,7 @@ async function saveEnrollmentAndSession({
   surname: string;
   mobile: string;
   email: string;
-  selectedSubjects: string[];
-  paperDates: Record<string, string>;
+  selection: ReturnType<typeof parsePaperSelections>;
   pricing: {
     courseFee?: number;
     refundableDeposit?: number;
