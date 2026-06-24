@@ -37,9 +37,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: `Please select a paper for ${missingUnitTest.subject}.` }, { status: 400 });
   }
 
+  const missingUnitTestDate = selection.unitTests.find((item) => item.subject && item.paper && !String(item.date ?? "").trim());
+  if (missingUnitTestDate) {
+    return NextResponse.json({ message: `Please choose a date for ${missingUnitTestDate.subject} - ${missingUnitTestDate.label}.` }, { status: 400 });
+  }
+
   const invalidDate = selection.fullLength.find((item) => !parseDisplayDate(String(item.date ?? "")));
   if (invalidDate) {
     return NextResponse.json({ message: `Please enter ${invalidDate.subject} in dd/mm/yyyy format.` }, { status: 400 });
+  }
+
+  const invalidUnitTestDate = selection.unitTests.find((item) => item.subject && item.paper && !parseDisplayDate(String(item.date ?? "")));
+  if (invalidUnitTestDate) {
+    return NextResponse.json({ message: `Please enter ${invalidUnitTestDate.subject} in dd/mm/yyyy format.` }, { status: 400 });
   }
 
   return saveEnrollmentAndSession({
@@ -124,9 +134,9 @@ async function saveEnrollmentAndSession({
         ...selection.unitTests.map((item) => ({
           studentId: student.id,
           subject: item.label,
-          timelineDays: 1,
+          timelineDays: Math.max(1, Math.ceil(((parseDisplayDate(item.date)?.getTime() ?? Date.now()) - Date.now()) / 86400000) || 1),
           startDate: new Date(),
-          dueDate: new Date()
+          dueDate: parseDisplayDate(item.date) as Date
         }))
       ]
     });

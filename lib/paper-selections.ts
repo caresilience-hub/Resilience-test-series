@@ -8,6 +8,7 @@ export type FullLengthPaperSelection = {
 export type UnitTestPaperSelection = {
   subject: string;
   paper: string;
+  date: string;
   label: string;
 };
 
@@ -57,9 +58,10 @@ function normalizeFullLengthSelection(item: RawSelectionItem): FullLengthPaperSe
 function normalizeUnitTestSelection(item: RawSelectionItem): UnitTestPaperSelection {
   const subject = normalizeSubjectName(String(item.subject ?? "").trim());
   const paper = String(item.paper ?? "").trim();
+  const date = String(item.date ?? item.dueDate ?? "").trim();
   const label = buildUnitTestLabel(subject, paper, item.label ?? item.paperLabel);
 
-  return { subject, paper, label };
+  return { subject, paper, date, label };
 }
 
 export function parsePaperSelections(body: unknown): NormalizedPaperSelections {
@@ -77,7 +79,10 @@ export function parsePaperSelections(body: unknown): NormalizedPaperSelections {
         ...fullLength.filter((item) => Boolean(item.subject)).map((item) => item.subject),
         ...unitTests.filter((item) => Boolean(item.subject && item.paper)).map((item) => item.label)
       ],
-      paperDates: Object.fromEntries(fullLength.filter((item) => Boolean(item.subject && item.date)).map((item) => [item.subject, item.date]))
+      paperDates: Object.fromEntries([
+        ...fullLength.filter((item) => Boolean(item.subject && item.date)).map((item) => [item.subject, item.date]),
+        ...unitTests.filter((item) => Boolean(item.subject && item.paper && item.date)).map((item) => [item.label, item.date])
+      ])
     };
   }
 

@@ -24,7 +24,7 @@ type FormState = {
   confirmPassword: string;
   fullLengthSelections: string[];
   fullLengthDates: Record<string, string>;
-  unitTestSelections: Record<string, string>;
+  unitTestSelections: Record<string, { paper: string; date: string }[]>;
 };
 
 type Step = "details" | "upi";
@@ -63,7 +63,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     fullLengthSelections: [],
     fullLengthDates: {},
-    unitTestSelections: {}
+    unitTestSelections: Object.fromEntries(unitTestSubjects.map((subject) => [subject, [{ paper: "", date: "" }]]))
   });
 
   const mobileDigits = form.mobile.replace(/\D/g, "");
@@ -71,7 +71,7 @@ export default function RegisterPage() {
   const passwordReady = form.password.length >= 8;
   const passwordsMatch = form.password === form.confirmPassword;
   const fullLengthCount = form.fullLengthSelections.length;
-  const unitTestCount = Object.values(form.unitTestSelections).filter(Boolean).length;
+  const unitTestCount = Object.values(form.unitTestSelections).flat().filter((row) => Boolean(row.paper)).length;
   const fullLengthPricing = calculateRegistrationPricing(fullLengthCount);
   const unitTestPricing = calculateUnitTestPricing(unitTestCount);
   const totalCourseFee = fullLengthPricing.courseFee + unitTestPricing.courseFee;
@@ -85,11 +85,14 @@ export default function RegisterPage() {
   }));
 
   const unitTestSummaries = unitTestSubjects
-    .filter((subject) => Boolean(form.unitTestSelections[subject]))
-    .map((subject) => ({
-      label: subject,
-      detail: getUnitTestLabel(subject, form.unitTestSelections[subject])
-    }));
+    .flatMap((subject) =>
+      (form.unitTestSelections[subject] ?? [])
+        .filter((row) => Boolean(row.paper))
+        .map((row) => ({
+          label: subject,
+          detail: `${getUnitTestLabel(subject, row.paper)}${row.date ? ` • ${formatDateInput(row.date)}` : ""}`
+        }))
+    );
 
   const paperSummaries = [...fullLengthSummaries, ...unitTestSummaries];
 
@@ -108,6 +111,16 @@ export default function RegisterPage() {
 
     const missingDate = form.fullLengthSelections.find((subject) => !String(form.fullLengthDates[subject] ?? "").trim());
     if (missingDate) return `Please enter a paper date for ${missingDate}.`;
+
+    const missingUnitTestPaper = unitTestSubjects.find((subject) =>
+      (form.unitTestSelections[subject] ?? []).some((row) => !row.paper && String(row.date ?? "").trim())
+    );
+    if (missingUnitTestPaper) return `Please select a paper for ${missingUnitTestPaper} before choosing a date.`;
+
+    const missingUnitTestDate = unitTestSubjects.find((subject) =>
+      (form.unitTestSelections[subject] ?? []).some((row) => row.paper && !String(row.date ?? "").trim())
+    );
+    if (missingUnitTestDate) return `Please choose a date for the unit test selected under ${missingUnitTestDate}.`;
 
     return "";
   }
@@ -128,6 +141,45 @@ export default function RegisterPage() {
         ...current,
         fullLengthSelections: nextSelections,
         fullLengthDates: nextDates
+      };
+    });
+  }
+
+  function addUnitTestRow(subject: string) {
+    setForm((current) => ({
+      ...current,
+      unitTestSelections: {
+        ...current.unitTestSelections,
+        [subject]: [...(current.unitTestSelections[subject] ?? []), { paper: "", date: "" }]
+      }
+    }));
+  }
+
+  function updateUnitTestRow(subject: string, index: number, patch: Partial<{ paper: string; date: string }>) {
+    setForm((current) => {
+      const nextRows = [...(current.unitTestSelections[subject] ?? [])];
+      nextRows[index] = { ...nextRows[index], ...patch };
+
+      return {
+        ...current,
+        unitTestSelections: {
+          ...current.unitTestSelections,
+          [subject]: nextRows
+        }
+      };
+    });
+  }
+
+  function removeUnitTestRow(subject: string, index: number) {
+    setForm((current) => {
+      const nextRows = [...(current.unitTestSelections[subject] ?? [])].filter((_, rowIndex) => rowIndex !== index);
+
+      return {
+        ...current,
+        unitTestSelections: {
+          ...current.unitTestSelections,
+          [subject]: nextRows.length ? nextRows : [{ paper: "", date: "" }]
+        }
       };
     });
   }
@@ -154,13 +206,16 @@ export default function RegisterPage() {
       date: form.fullLengthDates[subject]
     }));
 
-    const unitTests = unitTestSubjects
-      .filter((subject) => Boolean(form.unitTestSelections[subject]))
-      .map((subject) => ({
-        subject,
-        paper: form.unitTestSelections[subject],
-        label: getUnitTestLabel(subject, form.unitTestSelections[subject])
-      }));
+    const unitTests = unitTestSubjects.flatMap((subject) =>
+      (form.unitTestSelections[subject] ?? [])
+        .filter((row) => Boolean(row.paper))
+        .map((row) => ({
+          subject,
+          paper: row.paper,
+          date: row.date,
+          label: getUnitTestLabel(subject, row.paper)
+        }))
+    );
 
     try {
       const response = await fetch("/api/enrollments/submit", {
@@ -345,39 +400,68 @@ export default function RegisterPage() {
                       <span className="text-xs font-medium uppercase tracking-[0.24em] text-ink-500">Paper options</span>
                     </span>
                   </summary>
-                  <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-3">
                     {unitTestSubjects.map((subject) => {
-                      const selectedPaper = form.unitTestSelections[subject] ?? "";
+                      const selectedRows = form.unitTestSelections[subject] ?? [];
                       return (
                         <div key={subject} className="rounded-2xl border border-black/10 bg-white px-4 py-4 transition hover:border-ink-300">
-                          <div className="grid gap-3 lg:grid-cols-[1fr_320px] lg:items-center">
+                          <div className="grid gap-3">
                             <div>
                               <p className="text-sm font-semibold text-ink-900">{subject}</p>
-                              <p className="mt-1 text-sm text-ink-500">Choose one paper from the dropdown.</p>
+                              <p className="mt-1 text-sm text-ink-500">Choose any number of papers and set a date for each one.</p>
                             </div>
-                            <label className="space-y-1.5">
-                              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600">Select paper</span>
-                              <select
-                                value={selectedPaper}
-                                onChange={(event) =>
-                                  setForm((current) => ({
-                                    ...current,
-                                    unitTestSelections: {
-                                      ...current.unitTestSelections,
-                                      [subject]: event.target.value
-                                    }
-                                  }))
-                                }
-                                className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-indigo-400"
+                            <div className="space-y-3">
+                              {selectedRows.map((row, index) => (
+                                <div key={`${subject}-${index}`} className="grid gap-3 rounded-2xl border border-black/10 bg-ink-50 p-3 lg:grid-cols-[1fr_170px_auto] lg:items-end">
+                                  <label className="space-y-1.5">
+                                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600">Select paper</span>
+                                    <select
+                                      value={row.paper}
+                                      onChange={(event) =>
+                                        updateUnitTestRow(subject, index, {
+                                          paper: event.target.value
+                                        })
+                                      }
+                                      className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-indigo-400"
+                                    >
+                                      <option value="">Choose paper</option>
+                                      {unitTestPaperOptions[subject].map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                          {option.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="space-y-1.5">
+                                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-600">Paper date</span>
+                                    <input
+                                      type="date"
+                                      value={formatDateForPicker(row.date)}
+                                      onChange={(event) =>
+                                        updateUnitTestRow(subject, index, {
+                                          date: event.target.value
+                                        })
+                                      }
+                                      className="w-full rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-indigo-400"
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeUnitTestRow(subject, index)}
+                                    className="inline-flex h-fit items-center justify-center rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-ink-700 transition hover:bg-ink-50"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => addUnitTestRow(subject)}
+                                className="inline-flex items-center justify-center rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
                               >
-                                <option value="">Choose paper</option>
-                                {unitTestPaperOptions[subject].map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
+                                Add another paper
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
