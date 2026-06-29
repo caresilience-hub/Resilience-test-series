@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
 import { Badge } from "@/components/ui";
-
-const ADMIN_USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME ?? "caresilience2502";
+import { ADMIN_USERNAME } from "@/lib/admin-credentials";
 
 export default function AdminLoginPage() {
   const router = useRouter();

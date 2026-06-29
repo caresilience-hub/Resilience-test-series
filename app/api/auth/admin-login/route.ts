@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { buildSessionToken } from "@/lib/session";
 import { shouldUseSecureCookies } from "@/lib/cookies";
+import { ADMIN_USERNAME, ADMIN_PASSWORD } from "@/lib/admin-credentials";
 
 export const runtime = "nodejs";
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "caresilience2502";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Rdtg@3101";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@resilience.test";
-
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const body = await request.json().catch(() => ({}));
   const username = String(body.username ?? "").trim();
   const password = String(body.password ?? "");
 
@@ -22,30 +18,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Invalid admin credentials." }, { status: 401 });
   }
 
-  const user =
-    (await prisma.user.upsert({
-      where: { email: ADMIN_EMAIL },
-      update: {
-        firstName: "Admin",
-        surname: "User",
-        role: "ADMIN"
-      },
-      create: {
-        email: ADMIN_EMAIL,
-        firstName: "Admin",
-        surname: "User",
-        role: "ADMIN"
-      }
-    })) ?? null;
-
-  const token = buildSessionToken(user.id, "ADMIN");
-  await prisma.session.create({
-    data: {
-      userId: user.id,
-      token,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    }
-  });
+  const token = buildSessionToken("admin", "ADMIN");
 
   const response = NextResponse.json({
     ok: true,
