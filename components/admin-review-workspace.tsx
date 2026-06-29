@@ -88,6 +88,18 @@ type TabKey = "library" | "assignments" | "students" | "payments" | "refunds" | 
 
 const normalizePaperKind = (kind?: string | null) => kind?.toLowerCase().trim().replace(/\s+/g, "-") ?? "";
 
+function toDateInputValue(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function AdminReviewWorkspace() {
   const [activeTab, setActiveTab] = useState<TabKey>("library");
   const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
@@ -363,6 +375,28 @@ export function AdminReviewWorkspace() {
             ? "Refund marked under review."
             : "Refund reset to not eligible."
     );
+    await refresh();
+  }
+
+  async function updateEnrollmentDate(studentId: string, enrollmentId: string, dueDate: string) {
+    if (!dueDate) {
+      setMessage("Please select a new paper date.");
+      return;
+    }
+
+    const response = await fetch(`/api/admin/students/${studentId}/enrollments/${enrollmentId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dueDate })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setMessage(data.message ?? "Unable to update paper date.");
+      return;
+    }
+
+    setMessage(`Paper date updated to ${data?.enrollment?.dueDateLabel ?? dueDate}.`);
     await refresh();
   }
 
@@ -835,6 +869,29 @@ export function AdminReviewWorkspace() {
                           <p className="font-semibold text-ink-900">{normalizeSubjectName(enrollment.subject)}</p>
                           <p className="text-sm text-ink-600">Due date: {formatDate(enrollment.dueDate)}</p>
                           <p className="text-sm text-ink-600">Timeline: {enrollment.timelineDays} days</p>
+                          <form
+                            className="mt-3 space-y-2"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              const formData = new FormData(event.currentTarget);
+                              updateEnrollmentDate(student.id, enrollment.id, String(formData.get("dueDate") ?? "")).catch(() =>
+                                setMessage("Unable to update paper date.")
+                              );
+                            }}
+                          >
+                            <label className="block">
+                              <span className="text-xs font-medium uppercase tracking-[0.24em] text-ink-500">Edit paper date</span>
+                              <input
+                                name="dueDate"
+                                type="date"
+                                defaultValue={toDateInputValue(enrollment.dueDate)}
+                                className="mt-2 w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm"
+                              />
+                            </label>
+                            <button type="submit" className="rounded-full bg-ink-900 px-4 py-2 text-xs font-semibold text-white">
+                              Save date
+                            </button>
+                          </form>
                         </div>
                       ))}
                     </div>

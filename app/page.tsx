@@ -112,7 +112,9 @@ export default function HomePage() {
                     {pricingTable.map((plan) => (
                       <div key={plan.subjects} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                         <div>
-                          <p className="text-sm font-semibold tracking-[-0.02em]">{plan.subjects} Subjects</p>
+                          <p className="text-sm font-semibold tracking-[-0.02em]">
+                            {plan.subjects} {plan.subjects === 1 ? "Subject" : "Subjects"}
+                          </p>
                           <p className="text-xs text-white/70">Course fee + refundable deposit</p>
                         </div>
                         <p className="text-sm font-semibold tracking-[-0.02em]">
