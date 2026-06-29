@@ -3,13 +3,14 @@ import { Badge } from "@/components/ui";
 import { ADMIN_USERNAME } from "@/lib/admin-credentials";
 
 type AdminLoginPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     error?: string;
-  };
+  }>;
 };
 
-export default function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
-  const errorMessage = searchParams?.error ?? "";
+export default async function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const errorMessage = resolvedSearchParams.error ?? "";
   const status =
     errorMessage === "missing"
       ? "Please enter both username and password."
