@@ -4,26 +4,38 @@ import { shouldUseSecureCookies } from "@/lib/cookies";
 import { ADMIN_USERNAME, ADMIN_PASSWORD } from "@/lib/admin-credentials";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => ({}));
-  const username = String(body.username ?? "").trim();
-  const password = String(body.password ?? "");
+  const contentType = request.headers.get("content-type") ?? "";
+  let username = "";
+  let password = "";
+
+  if (contentType.includes("application/json")) {
+    const body = await request.json().catch(() => ({}));
+    username = String(body.username ?? "").trim();
+    password = String(body.password ?? "");
+  } else {
+    const formData = await request.formData().catch(() => null);
+    username = String(formData?.get("username") ?? "").trim();
+    password = String(formData?.get("password") ?? "");
+  }
 
   if (!username || !password) {
-    return NextResponse.json({ message: "Username and password are required." }, { status: 400 });
+    const response = NextResponse.redirect(new URL("/admin/login?error=missing", request.url));
+    response.cookies.set("resillience_session", "", { path: "/", maxAge: 0 });
+    return response;
   }
 
   if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
-    return NextResponse.json({ message: "Invalid admin credentials." }, { status: 401 });
+    const response = NextResponse.redirect(new URL("/admin/login?error=invalid", request.url));
+    response.cookies.set("resillience_session", "", { path: "/", maxAge: 0 });
+    return response;
   }
 
   const token = buildSessionToken("admin", "ADMIN");
 
-  const response = NextResponse.json({
-    ok: true,
-    redirectTo: "/admin/dashboard"
-  });
+  const response = NextResponse.redirect(new URL("/admin/dashboard", request.url));
 
   response.cookies.set("resillience_session", token, {
     httpOnly: true,
