@@ -1,16 +1,13 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import { SiteShell } from "@/components/site-shell";
 import { Badge } from "@/components/ui";
 import { ADMIN_USERNAME } from "@/lib/admin-credentials";
 
-type AdminLoginPageProps = {
-  searchParams?: Promise<{
-    error?: string;
-  }>;
-};
-
-export default async function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
-  const resolvedSearchParams = (await searchParams) ?? {};
-  const errorMessage = resolvedSearchParams.error ?? "";
+export default function AdminLoginPage() {
+  const searchParams = useSearchParams();
+  const errorMessage = searchParams.get("error");
   const status =
     errorMessage === "missing"
       ? "Please enter both username and password."
