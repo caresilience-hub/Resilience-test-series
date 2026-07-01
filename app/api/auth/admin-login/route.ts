@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const token = buildSessionToken("admin", "ADMIN");
 
-  const response = NextResponse.redirect(new URL("/admin/dashboard", request.url));
+  const response = NextResponse.redirect(new URL("/admin/dashboard", request.url),303);
 
   response.cookies.set("resillience_session", token, {
     httpOnly: true,
