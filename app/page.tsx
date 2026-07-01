@@ -107,7 +107,7 @@ export default function HomePage() {
               <div className="absolute -left-8 top-10 h-32 w-32 rounded-full bg-indigo-300/25 blur-3xl" />
               <div className="glass-strong relative rounded-[2rem] p-5 shadow-soft">
                 <div className="rounded-[1.5rem] bg-ink-900 p-6 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Pricing snapshot</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Full Length Mock</p>
                   <div className="mt-4 space-y-3">
                     {pricingTable.map((plan) => (
                       <div key={plan.subjects} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
