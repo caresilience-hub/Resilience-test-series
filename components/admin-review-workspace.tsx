@@ -88,6 +88,19 @@ type TabKey = "library" | "assignments" | "students" | "payments" | "refunds" | 
 
 const normalizePaperKind = (kind?: string | null) => kind?.toLowerCase().trim().replace(/\s+/g, "-") ?? "";
 
+function toDateInputValue(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 export function AdminReviewWorkspace() {
   const [activeTab, setActiveTab] = useState<TabKey>("library");
   const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
@@ -102,6 +115,7 @@ export function AdminReviewWorkspace() {
     temporaryPassword: string;
   } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [savingEnrollmentId, setSavingEnrollmentId] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const approvedStudents = useMemo(() => students.filter((student) => student.paymentStatus === "APPROVED"), [students]);
   const selectedApprovedStudent = useMemo(
@@ -336,6 +350,35 @@ export function AdminReviewWorkspace() {
 
     setMessage(paymentStatus === "APPROVED" ? "Payment approved." : paymentStatus === "REJECTED" ? "Payment marked rejected." : "Payment reset to waiting.");
     await refresh();
+  }
+
+  async function updateEnrollmentDate(studentId: string, enrollmentId: string, formData: FormData) {
+    const dueDate = String(formData.get("dueDate") ?? "").trim();
+
+    if (!dueDate) {
+      setMessage("Please choose a new paper date.");
+      return;
+    }
+
+    setSavingEnrollmentId(enrollmentId);
+    try {
+      const response = await fetch(`/api/admin/students/${studentId}/enrollments/${enrollmentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dueDate })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setMessage(data.message ?? "Unable to update the paper date.");
+        return;
+      }
+
+      setMessage("Paper date updated.");
+      await refresh();
+    } finally {
+      setSavingEnrollmentId((current) => (current === enrollmentId ? null : current));
+    }
   }
 
   async function updateRefundStatus(
@@ -835,6 +878,33 @@ export function AdminReviewWorkspace() {
                           <p className="font-semibold text-ink-900">{normalizeSubjectName(enrollment.subject)}</p>
                           <p className="text-sm text-ink-600">Due date: {formatDate(enrollment.dueDate)}</p>
                           <p className="text-sm text-ink-600">Timeline: {enrollment.timelineDays} days</p>
+                          <form
+                            className="mt-3 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/60 p-3"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void updateEnrollmentDate(student.id, enrollment.id, new FormData(event.currentTarget));
+                            }}
+                          >
+                            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-700">Manual date change authority</p>
+                            <div className="mt-2 flex flex-wrap items-end gap-2">
+                              <label className="flex min-w-[180px] flex-1 flex-col gap-1">
+                                <span className="text-xs font-medium text-ink-600">New due date</span>
+                                <input
+                                  type="date"
+                                  name="dueDate"
+                                  defaultValue={toDateInputValue(enrollment.dueDate)}
+                                  className="h-11 rounded-2xl border border-black/10 bg-white px-4 text-sm text-ink-900 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                                />
+                              </label>
+                              <button
+                                type="submit"
+                                disabled={savingEnrollmentId === enrollment.id}
+                                className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {savingEnrollmentId === enrollment.id ? "Saving..." : "Save date"}
+                              </button>
+                            </div>
+                          </form>
                         </div>
                       ))}
                     </div>
