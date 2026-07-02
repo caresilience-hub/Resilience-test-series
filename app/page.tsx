@@ -60,10 +60,16 @@ const heroProfiles = [
   }
 ] as const;
 
-const unitTestPricingSlabs = [1, 2, 3, 4, 5].map((count) => ({
-  count,
-  ...calculateUnitTestPricing(count)
-}));
+const unitTestPricingSlabs = [1, 2, 3, 4, 5].map((count) => {
+  const pricing = calculateUnitTestPricing(count);
+
+  return {
+    count,
+    courseFee: pricing.courseFee,
+    refundableDeposit: pricing.refundableDeposit,
+    totalPayable: pricing.totalPayable
+  };
+});
 
 export default function HomePage() {
   const heroStats = landingStats.filter((item) => item.label !== "Evaluators");
