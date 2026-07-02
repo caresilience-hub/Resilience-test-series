@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge, PrimaryButton, SectionHeading } from "@/components/ui";
 import { faqs, landingStats, testimonials } from "@/lib/mock-data";
-import { formatCurrency, pricingTable } from "@/lib/pricing";
+import { calculateUnitTestPricing, formatCurrency, pricingTable, unitTestPaperOptions, unitTestSubjects } from "@/lib/pricing";
 import { getMetadataBase } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -59,6 +59,11 @@ const heroProfiles = [
     imageClassName: "object-cover object-center"
   }
 ] as const;
+
+const unitTestPricingSlabs = [1, 2, 3, 4, 5].map((count) => ({
+  count,
+  ...calculateUnitTestPricing(count)
+}));
 
 export default function HomePage() {
   const heroStats = landingStats.filter((item) => item.label !== "Evaluators");
@@ -207,6 +212,65 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="mt-16">
+          <SectionHeading
+            eyebrow="Unit Tests"
+            title="Subject-wise unit tests with paper-level choices."
+            description="Unit tests are designed for focused practice. Students can choose papers from module and chapter-level options across all subjects except IBS."
+          />
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-[1.75rem] border border-slate-200/70 bg-white p-6 shadow-soft sm:p-8">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">What students can select</p>
+              <div className="mt-5 space-y-4">
+                {unitTestSubjects.map((subject) => (
+                  <div key={subject} className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-base font-semibold tracking-[-0.02em] text-ink-900">{subject}</p>
+                        <p className="mt-1 text-sm leading-6 text-ink-600">Choose any unit test paper or select multiple papers for deeper practice.</p>
+                      </div>
+                      <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">50 marks each</span>
+                    </div>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      {unitTestPaperOptions[subject].map((paperOption) => (
+                        <div key={paperOption.value} className="rounded-2xl border border-white/80 bg-white px-3 py-2 text-sm text-ink-700 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+                          {paperOption.label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-slate-200/70 bg-white p-6 shadow-soft sm:p-8">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Unit test pricing</p>
+              <p className="mt-3 text-sm leading-7 text-ink-600">
+                Course fee is calculated at <span className="font-semibold text-ink-900">₹150 per paper minus ₹1</span>. The refundable deposit is <span className="font-semibold text-ink-900">₹500 up to 3 papers</span> and <span className="font-semibold text-ink-900">₹1,000 for more than 3 papers</span>.
+              </p>
+              <div className="mt-5 space-y-3">
+                {unitTestPricingSlabs.map((plan) => (
+                  <div key={plan.count} className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50 px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold tracking-[-0.02em] text-ink-900">
+                        {plan.count} {plan.count === 1 ? "Paper" : "Papers"}
+                      </p>
+                      <p className="text-xs text-ink-600">Unit test fee + refundable deposit</p>
+                    </div>
+                    <p className="text-sm font-semibold tracking-[-0.02em] text-ink-900">
+                      {formatCurrency(plan.courseFee)} + {formatCurrency(plan.refundableDeposit)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 rounded-2xl bg-indigo-50 p-4">
+                <p className="text-sm font-semibold text-indigo-700">Need a custom combo?</p>
+                <p className="mt-1 text-sm leading-6 text-indigo-900">Mail us at caresilience@gmail.com for tailored unit-test combinations and timelines.</p>
+              </div>
+            </div>
           </div>
         </section>
 
