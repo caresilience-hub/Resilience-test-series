@@ -1,18 +1,18 @@
 export const subjects = [
   "Financial Reporting",
-  "Advanced financial Management",
-  "Audit",
-  "Direct Tax",
-  "Indirect Tax",
-  "IBS"
+  "Advanced Financial Management",
+  "Advanced Auditing, Assurance & Professional Ethics",
+  "Direct Tax Laws & International Taxation",
+  "Indirect Tax Laws",
+  "Integrated Business Solutions"
 ] as const;
 
 export const unitTestSubjects = [
   "Financial Reporting",
-  "Advanced financial Management",
-  "Audit",
-  "Direct Tax",
-  "Indirect Tax"
+  "Advanced Financial Management",
+  "Advanced Auditing, Assurance & Professional Ethics",
+  "Direct Tax Laws & International Taxation",
+  "Indirect Tax Laws"
 ] as const;
 
 export type SubjectName = (typeof subjects)[number];
@@ -24,22 +24,22 @@ export const unitTestPaperOptions: Record<UnitTestSubjectName, { value: string; 
     { value: "paper-2", label: "Paper 2 - Module 4" },
     { value: "paper-3", label: "Paper 3 - Module 5" }
   ],
-  "Advanced financial Management": [
+  "Advanced Financial Management": [
     { value: "paper-1", label: "Paper 1 - Chapter 1-5" },
     { value: "paper-2", label: "Paper 2 - Chapter 6-9" },
     { value: "paper-3", label: "Paper 3 - Chapter 10-15" }
   ],
-  Audit: [
+  "Advanced Auditing, Assurance & Professional Ethics": [
     { value: "paper-1", label: "Paper 1 - Module 1" },
     { value: "paper-2", label: "Paper 2 - Module 2" },
     { value: "paper-3", label: "Paper 3 - Module 3" }
   ],
-  "Direct Tax": [
+  "Direct Tax Laws & International Taxation": [
     { value: "paper-1", label: "Paper 1 - Module 1" },
     { value: "paper-2", label: "Paper 2 - Module 2" },
     { value: "paper-3", label: "Paper 3 - Module 3 & 4" }
   ],
-  "Indirect Tax": [
+  "Indirect Tax Laws": [
     { value: "paper-1", label: "Paper 1 - Module 1" },
     { value: "paper-2", label: "Paper 2 - Module 2" },
     { value: "paper-3", label: "Paper 3 - Module 3 & 4" }
@@ -53,7 +53,12 @@ export type PricingPlan = {
 };
 
 const subjectAliases: Record<string, string> = {
-  "Financial Management": "Advanced financial Management"
+  "Financial Management": "Advanced Financial Management",
+  "Advanced financial Management": "Advanced Financial Management",
+  "Audit": "Advanced Auditing, Assurance & Professional Ethics",
+  "Direct Tax": "Direct Tax Laws & International Taxation",
+  "Indirect Tax": "Indirect Tax Laws",
+  "IBS": "Integrated Business Solutions"
 };
 
 export function normalizeSubjectName(value: string) {

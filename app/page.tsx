@@ -225,7 +225,7 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Unit Tests"
             title="Subject-wise unit tests with paper-level choices."
-            description="Unit tests are designed for focused practice. Students can choose papers from module and chapter-level options across all subjects except IBS."
+            description="Unit tests are designed for focused practice. Students can choose papers from module and chapter-level options across all subjects except Integrated Business Solutions."
           />
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="rounded-[1.75rem] border border-slate-200/70 bg-white p-6 shadow-soft sm:p-8">
