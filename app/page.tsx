@@ -254,9 +254,6 @@ export default function HomePage() {
 
             <div className="rounded-[1.75rem] border border-slate-200/70 bg-white p-6 shadow-soft sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Unit test pricing</p>
-              <p className="mt-3 text-sm leading-7 text-ink-600">
-                Course fee is calculated at <span className="font-semibold text-ink-900">₹150 per paper minus ₹1</span>. The refundable deposit is <span className="font-semibold text-ink-900">₹500 up to 3 papers</span> and <span className="font-semibold text-ink-900">₹1,000 for more than 3 papers</span>.
-              </p>
               <div className="mt-5 space-y-3">
                 {unitTestPricingSlabs.map((plan) => (
                   <div key={plan.count} className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50 px-4 py-3">
